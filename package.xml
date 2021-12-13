@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>yamaopt_ros</name>
+  <version>0.0.1</version>
+  <description>The yamaopt_ros package</description>
+
+  <maintainer email="h-ishida@jsk.imi.i.u-tokyo.ac.jp">Hirokazu Ishida</maintainer>
+  <maintainer email="yamaguchi@jsk.imi.i.u-tokyo.ac.jp">Naoya Yamaguchi</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>jsk_recognition_msgs</exec_depend>
+  <exec_depend>rospy</exec_depend>
+
+</package>
