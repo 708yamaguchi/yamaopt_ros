@@ -2,7 +2,7 @@
 
 ROS wrapper for [yamaopt](https://github.com/HiroIshida/yamaopt), optimizing the position where the robot attaches the sensor.
 
-# Setup
+## Setup
 
 Create ROS workspace for yamaopt.
 ```
@@ -13,11 +13,12 @@ wstool init .
 wstool merge -t . https://raw.githubusercontent.com/708yamaguchi/yamaopt_ros/master/yamaopt.rosinstall
 wstool update -t .
 
-# Install yamaopt
+# Install yamaopt. The latest document is https://github.com/HiroIshida/yamaopt
 # apt install for Python 2.x scikit-robot
 sudo apt-get install -y libspatialindex-dev freeglut3-dev libsuitesparse-dev libblas-dev liblapack-dev
 cd yamaopt
 pip install -e .
+cd ..
 
 # Install yamaopt_ros
 source /opt/ros/$ROS_DISTRO/setup.bash
@@ -27,3 +28,18 @@ catkin build yamaopt_ros
 source devel/setup.bash
 ```
 
+## Sample
+
+1. Download sample rosbag
+
+```
+rosrun yamaopt_ros download_sample_data.py
+```
+
+2. launch sample
+
+For debug (TODO: replace debug with sample)
+```
+roslaunch yamaopt_ros debug.launch robot:=pr2
+roslaunch yamaopt_ros debug.launch robot:=fetch
+```

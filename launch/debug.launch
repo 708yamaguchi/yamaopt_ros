@@ -1,0 +1,24 @@
+<launch>
+
+  <arg name="robot" />
+  <arg name="gui" default="false" />
+
+  <!-- Play rosbag -->
+  <group if="$(eval robot == 'pr2')">
+    <include file="$(find yamaopt_ros)/launch/pr2_rosbag_play.launch" >
+      <arg name="rosbag" value="$(find yamaopt_ros)/data/pr2_kitchen.bag" />
+      <arg name="gui" value="$(arg gui)" />
+    </include>
+  </group>
+  <group if="$(eval robot == 'fetch')">
+    <include file="$(find yamaopt_ros)/launch/fetch_rosbag_play.launch" >
+      <arg name="rosbag" value="$(find yamaopt_ros)/data/fetch_corridor.bag" />
+      <arg name="gui" value="$(arg gui)" />
+    </include>
+  </group>
+
+  <!-- Find Optimal plane for sensor attachment -->
+  <node pkg="yamaopt_ros" type="debug_accumu_polygons.py" name="debug_accumu_polygons"
+        output="screen" />
+
+</launch>
