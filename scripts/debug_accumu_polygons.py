@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import rospkg
 import rospy
 import pickle
 from jsk_recognition_msgs.msg import PolygonArray
@@ -13,7 +14,8 @@ class Accumulator:
         self.pub = rospy.Publisher(pub_topic, PolygonArray, queue_size=10)
         self.accum_polygons = []
         self.max_polygon_len = 1000
-        self.dump_filename = "accum_polygons.pickle"
+        r = rospkg.RosPack()
+        self.dump_file = r.get_path('yamaopt_ros') + "/accum_polygons.pickle"
 
     def callback(self, msg):
         rospy.loginfo("accumulating {} polygons".format(len(msg.polygons)))
@@ -28,8 +30,8 @@ class Accumulator:
 
     def dump_pickle(self):
         rospy.loginfo("dumping {0} polygons to {1}".format(
-            len(self.accum_polygons), self.dump_filename))
-        with open(self.dump_filename, 'wb') as f:
+            len(self.accum_polygons), self.dump_file))
+        with open(self.dump_file, 'wb') as f:
             pickle.dump(self.accum_polygons, f)
 
     def clear_accum_polygons(self):

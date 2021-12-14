@@ -79,18 +79,6 @@
   <node name="quat_points_relay" pkg="topic_tools" type="relay"
         args="/head_camera/depth_registered/quater/throttled/points /head_camera/depth_registered/quater/points" />
 
-  <!-- latched topic republisher -->
-  <node pkg="jsk_fetch_startup" type="latched_topic_republisher.py" name="latched_topic_republisher_tf_static"
-        output="screen" >
-    <param name="~file" value="$(arg rosbag)" />
-    <param name="~topicname" value="/tf_static" />
-  </node>
-  <node pkg="jsk_fetch_startup" type="latched_topic_republisher.py" name="latched_topic_republisher_map"
-        output="screen" >
-      <param name="~file" value="$(arg rosbag)" />
-      <param name="~topicname" value="/map" />
-  </node>
-
   <!-- audio play -->
   <node pkg="audio_play" type="audio_play" name="audio_play" if="$(arg audio_play)" output="screen">
         <param name="device" value="$(arg audio_device)" />
@@ -106,7 +94,7 @@
   <node name="organized_multi_plane_segmentation"
         pkg="nodelet" type="nodelet"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)">
-    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <remap from="~input" to="/head_camera/depth_registered/points"/>
     <rosparam>
       publish_normal: true
     </rosparam>

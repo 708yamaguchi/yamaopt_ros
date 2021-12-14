@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
+import rospkg
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import pickle
 
 
@@ -9,7 +11,9 @@ def polygonstamped_to_nparray(polygon):
     return np.array([[pt.x, pt.y, pt.z] for pt in polygon.polygon.points])
 
 
-with open('./accum_polygons.pickle', 'rb') as f:
+r = rospkg.RosPack()
+dump_file = r.get_path('yamaopt_ros') + "/accum_polygons.pickle"
+with open(dump_file, 'rb') as f:
     polygons = pickle.load(f)
 
 polygons = [polygonstamped_to_nparray(e) for e in polygons]

@@ -38,8 +38,25 @@ rosrun yamaopt_ros download_sample_data.py
 
 2. launch sample
 
-For debug (TODO: replace debug with sample)
-```
-roslaunch yamaopt_ros debug.launch robot:=pr2
-roslaunch yamaopt_ros debug.launch robot:=fetch
-```
+  - Sample
+
+    TODO
+
+    ```
+    xxx
+    ```
+
+  - Debug
+
+    accumulating polygons
+
+    ```
+    roslaunch yamaopt_ros debug_accum_polygons.launch robot:=pr2
+    roslaunch yamaopt_ros debug_accum_polygons.launch robot:=fetch
+    ```
+
+    visualizing polygons
+
+    ```
+    rosrun yamaopt_ros debug_visualize_polygons.py
+    ```
