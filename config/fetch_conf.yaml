@@ -1,0 +1,10 @@
+urdf_path: ~/.skrobot/fetch_description/fetch.urdf
+optimization_frame: base_link # currently unused
+control_joint_names: [
+    torso_lift_joint, 
+    shoulder_pan_joint,
+    shoulder_lift_joint,
+    upperarm_roll_joint,
+    elbow_flex_joint,
+    forearm_roll_joint]
+endeffector_link_name: gripper_link
