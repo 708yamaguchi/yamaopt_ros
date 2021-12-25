@@ -18,4 +18,8 @@
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>rospy</exec_depend>
 
+  <test_depend>roseus</test_depend>
+  <test_depend>pr2eus</test_depend>
+  <test_depend>fetcheus</test_depend>
+
 </package>

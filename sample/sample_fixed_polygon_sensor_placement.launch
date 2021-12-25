@@ -8,7 +8,7 @@
     </rosparam>
   </node>
 
-  <node pkg="yamaopt_ros" type="test_sensor_placement.py" name="test_sensor_placement"
+  <node pkg="yamaopt_ros" type="test_fixed_sensor_placement.py" name="test_fixed_sensor_placement"
         output="screen" />
 
 </launch>

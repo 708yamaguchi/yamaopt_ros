@@ -1,0 +1,29 @@
+<launch>
+
+  <!-- Publish plane polygons -->
+  <include file="$(find yamaopt_ros)/launch/pr2_rosbag_play.launch" >
+    <arg name="rosbag" value="$(find yamaopt_ros)/data/pr2_kitchen.bag" />
+  </include>
+
+  <!-- Accumulate polygon array -->
+  <node pkg="yamaopt_ros" type="accum_polygons.py" name="accum_polygons">
+    <remap from="~input" to="/organized_multi_plane_segmentation/output_polygon" />
+    <rosparam>
+      max_polygon_len: 100
+    </rosparam>
+  </node>
+
+  <!-- Server to calculate sensor placement optimization -->
+  <node pkg="yamaopt_ros" type="sensor_placement.py" name="sensor_placement">
+    <rosparam>
+      robot_name: pr2
+      use_base: true
+      d_hover: 0.05
+    </rosparam>
+  </node>
+
+  <!-- Client to calculate sensor placement optimization -->
+  <node pkg="yamaopt_ros" type="pr2-sensor-placement-client.l" name="sensor_placement_client"
+        output="screen" />
+
+</launch>
