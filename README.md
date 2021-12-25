@@ -45,19 +45,19 @@ rosrun yamaopt_ros download_sample_data.py
 
   - Sample
 
-    TODO
+    Sensor placement optimization via rosservice using PR2 rosbag
 
     ```
-    xxx
+    roslaunch yamaopt_ros sample_pr2_sensor_placement.launch
     ```
 
-  - Debug
-
-    Sensor placement optimization via rosservice
+    Sensor placement optimization via rosservice with fixed polygons
 
     ```
-    roslaunch yamaopt_ros sensor_placement.test
+    roslaunch yamaopt_ros sample_fixed_polygon_sensor_placement.launch
     ```
+
+  - Debug (Remove later)
 
     accumulating polygons
 
