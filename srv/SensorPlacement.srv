@@ -1,0 +1,5 @@
+geometry_msgs/Point target_point # Target point to be observed by the sensor
+jsk_recognition_msgs/PolygonArray polygon_array # Input polygon array
+---
+geometry_msgs/Pose sensor_pose # Sensor placement pose
+geometry_msgs/Pose robot_pose # Robot base movement
