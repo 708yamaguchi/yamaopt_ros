@@ -49,12 +49,16 @@ class CalcSensorPlacement(object):
         polygon_list = []
         for polygon_stamped in polygon_array.polygons:
             polygon_msg = polygon_stamped.polygon
-            polygon = []
+            polygon = None
             for point in polygon_msg.points:
-                polygon.append(
-                    [point.x, point.y, point.z])
+                np_point = np.array([point.x, point.y, point.z])
+                if polygon is None:
+                    polygon = np.array([np_point])
+                else:
+                    polygon = np.append(polygon, [np_point], axis=0)
+            polygon = np.array(polygon)
             polygon_list.append(polygon)
-        return np.array(polygon_list)
+        return polygon_list
 
     def solve(self, req):
         rospy.loginfo("Calculate sensor placement.")
