@@ -53,6 +53,12 @@ rosrun yamaopt_ros download_sample_data.py
 
   - Debug
 
+    Sensor placement optimization via rosservice
+
+    ```
+    roslaunch yamaopt_ros sensor_placement.test
+    ```
+
     accumulating polygons
 
     ```

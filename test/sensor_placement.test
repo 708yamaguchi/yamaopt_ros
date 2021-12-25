@@ -1,0 +1,14 @@
+<launch>
+
+  <node pkg="yamaopt_ros" type="sensor_placement.py" name="sensor_placement">
+    <rosparam>
+      robot_name: pr2
+      use_base: true
+      d_hover: 0.05
+    </rosparam>
+  </node>
+
+  <node pkg="yamaopt_ros" type="test_sensor_placement.py" name="test_sensor_placement"
+        output="screen" />
+
+</launch>
