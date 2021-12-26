@@ -2,36 +2,49 @@
 
 import rospy
 from jsk_recognition_msgs.msg import PolygonArray
+from yamaopt_ros.srv import AccumulatePolygons, AccumulatePolygonsResponse
 
 
 class AccumPolygons:
     def __init__(self):
         self.sub = rospy.Subscriber("~input", PolygonArray, self.callback)
-        self.pub = rospy.Publisher("~output", PolygonArray, queue_size=10)
+        # Advertise Service
+        rospy.Service(
+            '~accum_polygons', AccumulatePolygons, self.accum_polygons)
+        rospy.Service(
+            '~clear_polygons', AccumulatePolygons, self.clear_polygons)
+        self.current_polygons = None
         self.accum_polygons = []
         self.max_polygon_len = rospy.get_param('max_polygon_len', 100)
 
     def callback(self, msg):
-        rospy.loginfo("accumulating {} polygons".format(len(msg.polygons)))
+        self.current_polygons = msg
+
+    def accum_polygons(self, req):
+        if self.current_polygons is None:
+            polygons = []
+        else:
+            polygons = self.current_polygons.polygons
+        rospy.loginfo("accumulating {} polygons".format(len(polygons)))
         # Extend polygons using subscribed topic
-        self.accum_polygons.extend(msg.polygons)
+        self.accum_polygons.extend(polygons)
         # Extract last self.max_polygon_len polygons
         if len(self.accum_polygons) > self.max_polygon_len:
             self.accum_polygons = self.accum_polygons[
                 len(self.accum_polygons)-self.max_polygon_len:]
-        # Publish accum polygons
-        self.publish_accum_polygons()
+        # Create response for rosservice
+        res = AccumulatePolygonsResponse()
+        res_poly = PolygonArray()
+        res_poly.header.stamp = rospy.Time.now()
+        if self.current_polygons is not None:
+            res_poly.header.frame_id = self.current_polygons.header.frame_id
+        res_poly.polygons = self.accum_polygons
+        res.polygon_array = res_poly
+        return res
 
-    def clear_accum_polygons(self):
+    def clear_polygons(self, req):
         self.accum_polygons = []
-
-    def publish_accum_polygons(self):
-        if len(self.accum_polygons) > 0:
-            pub_msg = PolygonArray()
-            pub_msg.header.stamp = rospy.Time.now()
-            pub_msg.header.frame_id = self.accum_polygons[0].header.frame_id
-            pub_msg.polygons = self.accum_polygons
-            self.pub.publish(pub_msg)
+        return AccumulatePolygonsResponse()
 
 
 if __name__ == '__main__':

@@ -7,6 +7,7 @@ import skrobot
 from skrobot.interfaces.ros import tf_utils
 from skrobot.planner.utils import set_robot_config
 from yamaopt.solver import KinematicSolver, SolverConfig
+from yamaopt.visualizer import VisManager
 
 import rospkg
 import rospy
@@ -20,6 +21,7 @@ class CalcSensorPlacement(object):
         robot_name = rospy.get_param('~robot_name', 'pr2')
         use_base = rospy.get_param('~use_base', True)
         self.d_hover = rospy.get_param('~d_hover', 0.05)
+        self.visualize = rospy.get_param('~visualize', False)
         # Optimization config
         r = rospkg.RosPack()
         if robot_name == 'fetch':
@@ -85,6 +87,13 @@ class CalcSensorPlacement(object):
             av = sol.x
         res.angle_vector = [Float32(i) for i in av]
         res.base_pose = tf_utils.coords_to_geometry_pose(sp.robot.coords())
+        # Visualize in scikit-robot
+        if self.visualize:
+            vm = VisManager(self.config)
+            vm.add_polygon_list(polygons)
+            vm.add_target(target_pos)
+            vm.set_angle_vector(sol.x)
+            vm.show_while()
         return res
 
 

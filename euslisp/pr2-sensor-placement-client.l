@@ -6,16 +6,24 @@
 
 (pr2-init)
 
-;; Wait for accum_polygons/output to be published
-(unix:sleep 1)
-
 (let ((req (instance yamaopt_ros::SensorPlacementRequest :init))
-      (accum-polygons
-       (one-shot-subscribe "accum_polygons/output"
-                           jsk_recognition_msgs::PolygonArray))
       (target-point (instance geometry_msgs::Point :init))
+      (accum-polygons (instance jsk_recognition_msgs::PolygonArray :init))
       res res-joint-names res-angle-vector res-base-pose)
-  ;; Send request
+  ;; Clear accumlated polygons
+  (ros::service-call "/accum_polygons/clear_polygons"
+                     (instance yamaopt_ros::AccumulatePolygonsRequest :init))
+  ;; Get accumlated polygon
+  (dotimes (i 3)
+    (unix:sleep 3)
+    (setq res
+          (ros::service-call "/accum_polygons/accum_polygons"
+                             (instance yamaopt_ros::AccumulatePolygonsRequest :init)))
+    (send accum-polygons :header (send (send res :polygon_array) :header))
+    (send accum-polygons :polygons
+          (append (send accum-polygons :polygons)
+                  (send (send res :polygon_array) :polygons))))
+  ;; Send sensor placement request
   (send target-point :x 3)
   (send target-point :y 0)
   (send target-point :z 1)
