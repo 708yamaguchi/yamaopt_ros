@@ -100,6 +100,19 @@
     </rosparam>
   </node>
 
+  <!-- Convert Polygon Array -->
+  <node name="polygon_array_transformer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/PolygonArrayTransformer $(arg manager)">
+    <remap from="~input_polygons"
+           to="/organized_multi_plane_segmentation/output_polygon"/>
+    <remap from="~input_coefficients"
+           to="/organized_multi_plane_segmentation/output_coefficients"/>
+    <rosparam>
+      frame_id: /base_link
+    </rosparam>
+  </node>
+
   <!-- rosbag player -->
   <node pkg="rosbag" type="play" name="rosbag_play"
         args="$(arg rosbag) $(arg loop_flag) --clock --start $(arg start_time) $(arg duration)" output="screen" />
