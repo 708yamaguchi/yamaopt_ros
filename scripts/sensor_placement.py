@@ -11,7 +11,7 @@ from yamaopt.visualizer import VisManager
 
 import rospkg
 import rospy
-from std_msgs.msg import Float32, String
+from std_msgs.msg import Bool, Float32, String
 from yamaopt_ros.srv import SensorPlacement, SensorPlacementResponse
 
 
@@ -74,7 +74,9 @@ class CalcSensorPlacement(object):
         q_init = -np.ones(len(self.kinsol.control_joint_ids)) * 0.4
         sol, target_polygon = self.kinsol.solve_multiple(
             q_init, polygons, target_pos, d_hover=self.d_hover)
-        assert sol.success
+        success = sol.success
+        if not success:
+            rospy.logerr('Sensor placement SQP optimization failed.')
         rospy.loginfo('Calculation finished successfully')
         # Return rosservice response
         joints = [self.robot.__dict__[name]
@@ -89,12 +91,12 @@ class CalcSensorPlacement(object):
             av = sol.x
         res.angle_vector = [Float32(i) for i in av]
         res.base_pose = tf_utils.coords_to_geometry_pose(sp.robot.coords())
+        res.success = Bool(data=success)
         # Visualize in scikit-robot
         if self.visualize:
             vm = VisManager(self.config)
             vm.add_polygon_list(polygons)
             vm.add_target(target_pos)
-            vm.viewer.add(self.robot_orig)  # original position of robot
             vm.set_angle_vector(sol.x)
             vm.show_while()
         return res
