@@ -14,8 +14,8 @@
   (ros::service-call "/accum_polygons/clear_polygons"
                      (instance yamaopt_ros::AccumulatePolygonsRequest :init))
   ;; Get accumlated polygon
-  (dotimes (i 3)
-    (unix:sleep 3)
+  (dotimes (i 5)
+    (unix:sleep 2)
     (setq res
           (ros::service-call "/accum_polygons/accum_polygons"
                              (instance yamaopt_ros::AccumulatePolygonsRequest :init)))
@@ -24,9 +24,9 @@
           (append (send accum-polygons :polygons)
                   (send (send res :polygon_array) :polygons))))
   ;; Send sensor placement request
-  (send target-point :x 3)
-  (send target-point :y 0)
-  (send target-point :z 1)
+  (send target-point :x 1.0)
+  (send target-point :y 0.3)
+  (send target-point :z 1.0)
   (send req :target_point target-point)
   (send req :polygon_array accum-polygons)
   ;; Receive response
