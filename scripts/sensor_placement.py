@@ -34,9 +34,11 @@ class CalcSensorPlacement(object):
             config_path, use_base=use_base)
         self.kinsol = KinematicSolver(self.config)
         # Robot config
-        self.robot = skrobot.model.RobotModel()
         urdf_path = os.path.expanduser(self.config.urdf_path)
+        self.robot = skrobot.model.RobotModel()
         self.robot.load_urdf_file(urdf_path)
+        self.robot_orig = skrobot.model.RobotModel()  # to visualize orig pos
+        self.robot_orig.load_urdf_file(urdf_path)
         # Advertise Service
         rospy.Service('sensor_placement', SensorPlacement, self.solve)
 
@@ -92,6 +94,7 @@ class CalcSensorPlacement(object):
             vm = VisManager(self.config)
             vm.add_polygon_list(polygons)
             vm.add_target(target_pos)
+            vm.viewer.add(self.robot_orig)  # original position of robot
             vm.set_angle_vector(sol.x)
             vm.show_while()
         return res

@@ -5,6 +5,7 @@
       robot_name: pr2
       use_base: true
       d_hover: 0.05
+      visualize: true
     </rosparam>
   </node>
 
