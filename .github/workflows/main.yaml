@@ -10,7 +10,7 @@ on:
 
 jobs:
     build:
-        runs-on: ${{ matrix.os }}
+        runs-on: ubuntu-latest
         strategy:
           matrix:
             python-version: [2.7, 3.6]
