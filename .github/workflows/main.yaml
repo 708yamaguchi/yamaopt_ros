@@ -19,16 +19,22 @@ jobs:
                 # Use download_sample_data.py with linked devel-space layout (with sourced workspace packages)
                 # https://github.com/ros-industrial/industrial_ci/pull/757
                 BUILDER: catkin_tools_devel
-                # Use ppa repository to install GLIBCXX_3.4.26 via gcc-9 and libstdc++ (Maybe not needed in noetic)
+                # Install GLIBCXX_3.4.26 to use tinyfk (Maybe not needed in noetic)
+                # Use ppa repository via custom commands because default industrial_ci does not support it
                 # https://github.com/ros-industrial/industrial_ci/blob/master/doc/index.rst#customize-within-the-ci-process
-                BEFORE_INIT: add-apt-repository ppa:ubuntu-toolchain-r/test
+                AFTER_INIT: |
+                    # Do not use add-apt-repository command to avoid heavy install of software-properties-common
+                    # https://www.usagi1975.com/2019152355/
+                    apt-key adv --keyserver keyserver.ubuntu.com --recv 60C317803A41BA51845E371A1E9377A2BA9EF27F
+                    echo "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu bionic main " > /etc/apt/sources.list.d/glibcxx.list
+                    deb-src "http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu bionic main" >> /etc/apt/sources.list.d/glibcxx.list
+                    apt update -qq
+                    apt -qq install -y gcc-9 libstdc++
                 # UPSTREAM_WORKSPACE is not needed for melodic (maybe needed for noetic)
                 # UPSTREAM_WORKSPACE: 'yamaopt.rosinstall'
                 ADDITIONAL_DEBS: |
                     # Installing skrobot on Python 2.x
                     libspatialindex-dev freeglut3-dev libsuitesparse-dev libblas-dev liblapack-dev
-                    # Install GLIBCXX_3.4.26 to use tinyfk
-                    gcc-9 libstdc++
                 ROSDEP_SKIP_KEYS: 'fetcheus'
 
         steps:
