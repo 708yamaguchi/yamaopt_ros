@@ -1,8 +1,4 @@
 - git:
-    local-name: yamaopt
-    uri: https://github.com/HiroIshida/yamaopt.git
-    version: master
-- git:
     local-name: yamaopt_ros
     uri: https://github.com/708yamaguchi/yamaopt_ros.git
     version: master

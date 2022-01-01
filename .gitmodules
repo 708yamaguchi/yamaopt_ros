@@ -1,0 +1,4 @@
+[submodule "yamaopt"]
+	path = yamaopt
+	url = https://github.com/HiroIshida/yamaopt.git
+	branch = master
