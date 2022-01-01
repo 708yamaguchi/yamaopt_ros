@@ -18,6 +18,10 @@ else()
   message(FATAL_ERROR "Fail ${YAMAOPT_INSTALL_COMMAND}")
 endif()
 
+# Download sample rosbag data
+add_custom_target(${PROJECT_NAME}_download_sample_data ALL
+  COMMAND ${PROJECT_SOURCE_DIR}/scripts/download_sample_data.py)
+
 # Install yamaopt_ros with catkin
 find_package(catkin REQUIRED COMPONENTS
   message_generation
@@ -39,43 +43,12 @@ generate_messages(
   jsk_recognition_msgs
   )
 
-# Download sample rosbag data
-# add_custom_target(${PROJECT_NAME}_download_sample_data ALL
-#   COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/download_sample_data.py)
-execute_process(COMMAND rospack list
-    RESULT_VARIABLE RET
-    OUTPUT_VARIABLE STD_OUTERR
-    ERROR_VARIABLE STD_OUTERR)
-message(WARNING ${STD_OUTERR})
-execute_process(COMMAND export
-    RESULT_VARIABLE RET
-    OUTPUT_VARIABLE STD_OUTERR
-    ERROR_VARIABLE STD_OUTERR)
-message(WARNING ${STD_OUTERR})
-add_custom_target(${PROJECT_NAME}_download_sample_data ALL
-  COMMAND ${PROJECT_SOURCE_DIR}/scripts/download_sample_data.py)
-
 catkin_package(
   CATKIN_DEPENDS message_runtime
   )
 
 # Test yamaopt_ros
 if(CATKIN_ENABLE_TESTING)
-  message(WARNING "test here!")
-  # Install
-  execute_process(COMMAND rospack list
-    RESULT_VARIABLE RET
-    OUTPUT_VARIABLE STD_OUTERR
-    ERROR_VARIABLE STD_OUTERR)
-  message(WARNING ${STD_OUTERR})
-  execute_process(COMMAND export
-    RESULT_VARIABLE RET
-    OUTPUT_VARIABLE STD_OUTERR
-    ERROR_VARIABLE STD_OUTERR)
-  message(WARNING ${STD_OUTERR})
-  # add_custom_target(${PROJECT_NAME}_download_sample_data_test ALL
-  #   COMMAND ${PROJECT_SOURCE_DIR}/scripts/download_sample_data.py)
-
   find_package(catkin REQUIRED COMPONENTS rostest)
   add_rostest(test/test_pr2_sensor_placement.test ARGS gui:=false)
 endif()
