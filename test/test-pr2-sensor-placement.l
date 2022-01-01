@@ -9,7 +9,7 @@
 
 (pr2-init)
 
-(deftest test-angle-vector
+(deftest test-pr2-sensor-placement
   (let ((req (instance yamaopt_ros::SensorPlacementRequest :init))
         (target-point (instance geometry_msgs::Point :init))
         (accum-polygons (instance jsk_recognition_msgs::PolygonArray :init))
@@ -28,12 +28,9 @@
             (append (send accum-polygons :polygons)
                     (send (send res :polygon_array) :polygons))))
     ;; Send sensor placement request
-    ;; (send target-point :x 1.0)
-    ;; (send target-point :y 0.3)
-    ;; (send target-point :z 1.0)
-    (send target-point :x -0.1)
-    (send target-point :y 0.7)
-    (send target-point :z 0.3)
+    (send target-point :x 1.0)
+    (send target-point :y 0.3)
+    (send target-point :z 1.0)
     (send req :target_point target-point)
     (send req :polygon_array accum-polygons)
     ;; Receive response
@@ -51,7 +48,7 @@
     (send *ri* :move-to res-base-pose)
     (objects (list *pr2* (make-coords :pos (ros::tf-point->pos target-point))))
     ;; Assertion for test
-    (assert (send res :success))
+    (assert (send (send res :success) :data))
     ))
 
 (run-all-tests)

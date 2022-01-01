@@ -78,7 +78,6 @@ class CalcSensorPlacement(object):
             q_init, polygons, target_obj_pos, d_hover=self.d_hover,
             joint_limit_margin=self.joint_limit_margin)
         success = sol.success
-        rospy.logerr(sol)
         if not success:
             rospy.logerr('Sensor placement SQP optimization failed.')
         rospy.loginfo('Calculation finished successfully')
