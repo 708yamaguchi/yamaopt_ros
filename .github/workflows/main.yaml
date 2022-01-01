@@ -16,14 +16,21 @@ jobs:
             ros-env:
               # (Currently) Don't test on noetic because pr2eus is not released
               - ROS_DISTRO: melodic
-                # Use download_sample_data.py with workspace packages
+                # Use download_sample_data.py with linked devel-space layout (with sourced workspace packages)
                 # https://github.com/ros-industrial/industrial_ci/pull/757
                 BUILDER: catkin_tools_devel
-                # UPSTREAM_WORKSPACE is currently not needed
+                # Use ppa repository to install GLIBCXX_3.4.26 via gcc-9 and libstdc++ (Maybe not needed in noetic)
+                # https://github.com/ros-industrial/industrial_ci/blob/master/doc/index.rst#customize-within-the-ci-process
+                BEFORE_INIT: sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+                # UPSTREAM_WORKSPACE is not needed for melodic (maybe needed for noetic)
                 # UPSTREAM_WORKSPACE: 'yamaopt.rosinstall'
-                # This step for just installing skrobot on py 2x...
-                ADDITIONAL_DEBS: 'libspatialindex-dev freeglut3-dev libsuitesparse-dev libblas-dev liblapack-dev'
+                ADDITIONAL_DEBS: |
+                    # Installing skrobot on Python 2.x
+                    libspatialindex-dev freeglut3-dev libsuitesparse-dev libblas-dev liblapack-dev
+                    # Install GLIBCXX_3.4.26 to use tinyfk
+                    gcc-9 libstdc++
                 ROSDEP_SKIP_KEYS: 'fetcheus'
+
         steps:
             - name: Checkout Code
               uses: actions/checkout@v2
