@@ -16,41 +16,17 @@ jobs:
             ros-env:
               # Don't test on noetic because pr2eus is not released
               - ROS_DISTRO: melodic
-                ROS_REPO: main
                 UPSTREAM_WORKSPACE: 'yamaopt.rosinstall'
                 ROSDEP_SKIP_KEYS: 'fetcheus'
-                NOT_TEST_BUILD: true
         steps:
             - name: Checkout code
               uses: actions/checkout@v1
-
-            - name: Setup ROS
-              uses: 'ros-industrial/industrial_ci@master'
-              env: ${{matrix.ros-env}}
 
             - name: Install APT On Linux # This step for just installing skrobot on py 2x...
               run: |
                 sudo apt-get update -qq -y
                 sudo apt-get install -qq -y libspatialindex-dev freeglut3-dev libsuitesparse-dev libblas-dev liblapack-dev
 
-            - name: Create workspace
-              run: |
-                  # Download source
-                  mkdir yamaopt_ws/src -p
-                  cd yamaopt_ws/src
-                  wstool init .
-                  wstool merge -t . https://raw.githubusercontent.com/708yamaguchi/yamaopt_ros/master/yamaopt.rosinstall
-                  wstool update -t .
-                  # pip install yamaopt
-                  cd yamaopt
-                  pip install -e .
-                  cd ..
-                  # Build yamaopt_ros
-                  source /opt/ros/$ROS_DISTRO/setup.bash
-                  rosdep install -y -r --from-paths . --ignore-src
-                  cd ../
-                  catkin build yamaopt_ros
-
-            - name: Run Tests
-              run: |
-                  catkin run_tests
+            - name: Setup ROS
+              uses: 'ros-industrial/industrial_ci@master'
+              env: ${{matrix.ros-env}}
