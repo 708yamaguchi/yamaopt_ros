@@ -14,8 +14,11 @@ jobs:
         strategy:
           matrix:
             ros-env:
-              # Don't test on noetic because pr2eus is not released
+              # (Currently) Don't test on noetic because pr2eus is not released
               - ROS_DISTRO: melodic
+                # Use download_sample_data.py with workspace packages
+                # https://github.com/ros-industrial/industrial_ci/pull/757
+                BUILDER: catkin_tools_devel
                 # UPSTREAM_WORKSPACE is currently not needed
                 # UPSTREAM_WORKSPACE: 'yamaopt.rosinstall'
                 # This step for just installing skrobot on py 2x...
