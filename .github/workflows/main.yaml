@@ -25,8 +25,10 @@ jobs:
                   python-version: 2.7
             - name: Install APT On Linux # This step for just installing skrobot on py 2x...
               run: |
+                sudo add-apt-repository ppa:ubuntu-toolchain-r/test
                 sudo apt-get update -qq -y
                 sudo apt-get install -qq -y libspatialindex-dev freeglut3-dev libsuitesparse-dev libblas-dev liblapack-dev
+                sudo apt install -qq -y gcc-9 libstdc++6
             - name: Checkout Code
               uses: actions/checkout@v2
               with:
