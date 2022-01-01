@@ -21,7 +21,7 @@ jobs:
                 BUILDER: catkin_tools_devel
                 # Use ppa repository to install GLIBCXX_3.4.26 via gcc-9 and libstdc++ (Maybe not needed in noetic)
                 # https://github.com/ros-industrial/industrial_ci/blob/master/doc/index.rst#customize-within-the-ci-process
-                BEFORE_INIT: sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+                BEFORE_INIT: add-apt-repository ppa:ubuntu-toolchain-r/test
                 # UPSTREAM_WORKSPACE is not needed for melodic (maybe needed for noetic)
                 # UPSTREAM_WORKSPACE: 'yamaopt.rosinstall'
                 ADDITIONAL_DEBS: |
