@@ -30,7 +30,8 @@ jobs:
                     deb-src "http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu bionic main" >> /etc/apt/sources.list.d/glibcxx.list
                     apt update -qq
                     apt -qq install -y gcc-9 libstdc++6
-                    # Temporary to pass test. Remove after yamaopt's requirements update
+                # Temporary to pass test. Remove after yamaopt's requirements update
+                BEFORE_RUN_TARGET_TEST:
                     pip install numpy==1.16.6
                 # UPSTREAM_WORKSPACE is not needed for melodic (maybe needed for noetic)
                 # UPSTREAM_WORKSPACE: 'yamaopt.rosinstall'
