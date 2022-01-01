@@ -17,10 +17,10 @@ jobs:
             ros-distro: [melodic, noetic]
         steps:
             - name: Checkout code
-            - uses: actions/checkout@v1
+              uses: actions/checkout@v1
 
             - name: Setup ROS
-            - uses: 'ros-industrial/industrial_ci@master'
+              uses: 'ros-industrial/industrial_ci@master'
               env: ${{matrix.ros-distro}}
 
             - name: Setup python
