@@ -19,6 +19,10 @@ jobs:
                 # UPSTREAM_WORKSPACE: 'yamaopt.rosinstall' # Currently not needed
                 ROSDEP_SKIP_KEYS: 'fetcheus'
         steps:
+            - name: Setup python
+              uses: actions/setup-python@v2
+              with:
+                  python-version: 2.7
             - name: Install APT On Linux # This step for just installing skrobot on py 2x...
               run: |
                 sudo apt-get update -qq -y
