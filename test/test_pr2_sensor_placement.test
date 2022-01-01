@@ -1,5 +1,7 @@
 <launch>
 
+  <arg name="gui" default="true" />
+
   <!-- Publish plane polygons -->
   <include file="$(find yamaopt_ros)/launch/pr2_rosbag_play.launch" >
     <arg name="rosbag" value="$(find yamaopt_ros)/data/pr2_kitchen.bag" />
@@ -15,16 +17,19 @@
 
   <!-- Server to calculate sensor placement optimization -->
   <node pkg="yamaopt_ros" type="sensor_placement.py" name="sensor_placement" output="screen">
-    <rosparam>
+    <rosparam subst_value="true">
       robot_name: pr2
       use_base: true
       d_hover: 0.05
-      visualize: true
+      visualize: $(arg gui)
     </rosparam>
   </node>
 
   <!-- Client to calculate sensor placement optimization -->
-  <node pkg="yamaopt_ros" type="pr2-sensor-placement-client.l" name="sensor_placement_client"
-        output="screen" />
+  <test pkg="yamaopt_ros" type="test-pr2-sensor-placement.l" test-name="sensor_placement_client">
+    <rosparam subst_value="true">
+      visualize: $(arg gui)
+    </rosparam>
+  </test>
 
 </launch>

@@ -21,6 +21,7 @@ class CalcSensorPlacement(object):
         robot_name = rospy.get_param('~robot_name', 'pr2')
         use_base = rospy.get_param('~use_base', True)
         self.d_hover = rospy.get_param('~d_hover', 0.05)
+        self.joint_limit_margin = rospy.get_param('~joint_limit_margin', 5.0)
         self.visualize = rospy.get_param('~visualize', False)
         # Optimization config
         r = rospkg.RosPack()
@@ -68,13 +69,16 @@ class CalcSensorPlacement(object):
         rospy.loginfo("Calculate sensor placement.")
         # Polygons and target pos
         polygons = self.polygon_array_to_polygon_list(req.polygon_array)
-        target_pos = req.target_point
-        target_pos = np.array([target_pos.x, target_pos.y, target_pos.z])
+        target_obj_pos = req.target_point
+        target_obj_pos = np.array(
+            [target_obj_pos.x, target_obj_pos.y, target_obj_pos.z])
         # Solve optimization
         q_init = -np.ones(len(self.kinsol.control_joint_ids)) * 0.4
-        sol, target_polygon = self.kinsol.solve_multiple(
-            q_init, polygons, target_pos, d_hover=self.d_hover)
+        sol = self.kinsol.solve_multiple(
+            q_init, polygons, target_obj_pos, d_hover=self.d_hover,
+            joint_limit_margin=self.joint_limit_margin)
         success = sol.success
+        rospy.logerr(sol)
         if not success:
             rospy.logerr('Sensor placement SQP optimization failed.')
         rospy.loginfo('Calculation finished successfully')
@@ -95,9 +99,8 @@ class CalcSensorPlacement(object):
         # Visualize in scikit-robot
         if self.visualize:
             vm = VisManager(self.config)
-            vm.add_polygon_list(polygons)
-            vm.add_target(target_pos)
-            vm.set_angle_vector(sol.x)
+            vm.add_target(target_obj_pos)
+            vm.reflect_solver_result(sol, polygons, show_polygon_axis=True)
             vm.show_while()
         return res
 
