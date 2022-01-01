@@ -30,13 +30,14 @@ jobs:
             - name: Cache ros data
               uses: actions/cache@v2
               env:
-                cache-name: cache-ros-data
+                # You can discard old cache and use new data by updating version number
+                cache-version: v1
               with:
                 # rosbag data is installed at ~/.ros/data
                 path: ~/.ros/data
-                key: cache-ros-data-${{ hashFiles('**/package-lock.json') }}
+                key: cache-ros-data-${{ env.cache-version }}-${{ hashFiles('**/package-lock.json') }}
                 restore-keys: |
-                  cache-ros-data-
+                  cache-ros-data-${{ env.cache-version }}
 
             - name: Setup ROS
               uses: 'ros-industrial/industrial_ci@master'

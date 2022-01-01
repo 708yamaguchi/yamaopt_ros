@@ -39,13 +39,13 @@ generate_messages(
   jsk_recognition_msgs
   )
 
-catkin_package(
-  CATKIN_DEPENDS message_runtime
-  )
-
 # Download sample rosbag data
 add_custom_target(${PROJECT_NAME}_download_sample_data ALL
   COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/download_sample_data.py)
+
+catkin_package(
+  CATKIN_DEPENDS message_runtime
+  )
 
 # Test yamaopt_ros
 # if(CATKIN_ENABLE_TESTING)
