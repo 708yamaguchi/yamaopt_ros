@@ -19,9 +19,6 @@ jobs:
                 UPSTREAM_WORKSPACE: 'yamaopt.rosinstall'
                 ROSDEP_SKIP_KEYS: 'fetcheus'
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v1
-
             - name: Install APT On Linux # This step for just installing skrobot on py 2x...
               run: |
                 sudo apt-get update -qq -y

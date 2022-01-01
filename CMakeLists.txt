@@ -7,7 +7,7 @@ if(NOT ${PYTHONINTERP_FOUND})
   message(FATAL_ERROR "Python interpreter is not found.")
 endif()
 set(YAMAOPT_INSTALL_COMMAND
-  ${PYTHON_EXECUTABLE} -m pip install -e ${CMAKE_SOURCE_DIR}/yamaopt --user)
+  ${PYTHON_EXECUTABLE} -m pip install -e ${CMAKE_SOURCE_DIR}/yamaopt)
 execute_process(COMMAND ${YAMAOPT_INSTALL_COMMAND} RESULT_VARIABLE RET)
 if("${RET}" STREQUAL "0")
   message("Execute ${YAMAOPT_INSTALL_COMMAND}")
