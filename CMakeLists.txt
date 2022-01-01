@@ -8,10 +8,13 @@ if(NOT ${PYTHONINTERP_FOUND})
 endif()
 set(YAMAOPT_INSTALL_COMMAND
   ${PYTHON_EXECUTABLE} -m pip install -e ${CMAKE_SOURCE_DIR}/yamaopt)
-execute_process(COMMAND ${YAMAOPT_INSTALL_COMMAND} RESULT_VARIABLE RET)
+execute_process(COMMAND ${YAMAOPT_INSTALL_COMMAND}
+  RESULT_VARIABLE RET
+  OUTPUT_VARIABLE STD_OUTERR ERROR_VARIABLE STD_OUTERR)
 if("${RET}" STREQUAL "0")
   message("Execute ${YAMAOPT_INSTALL_COMMAND}")
 else()
+  message(WARNING ${STD_OUTERR})
   message(FATAL_ERROR "Fail ${YAMAOPT_INSTALL_COMMAND}")
 endif()
 
@@ -20,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   rospy
   geometry_msgs
+  jsk_data
   jsk_recognition_msgs
   )
 
@@ -38,6 +42,10 @@ generate_messages(
 catkin_package(
   CATKIN_DEPENDS message_runtime
   )
+
+# Download sample rosbag data
+add_custom_target(${PROJECT_NAME}_download_sample_data ALL
+  COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/download_sample_data.py)
 
 # Test yamaopt_ros
 if(CATKIN_ENABLE_TESTING)
