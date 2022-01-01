@@ -48,7 +48,7 @@ add_custom_target(${PROJECT_NAME}_download_sample_data ALL
   COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/download_sample_data.py)
 
 # Test yamaopt_ros
-if(CATKIN_ENABLE_TESTING)
-  find_package(catkin REQUIRED COMPONENTS rostest)
-  add_rostest(test/test_pr2_sensor_placement.test ARGS gui:=false)
-endif()
+# if(CATKIN_ENABLE_TESTING)
+#   find_package(catkin REQUIRED COMPONENTS rostest)
+#   add_rostest(test/test_pr2_sensor_placement.test ARGS gui:=false)
+# endif()

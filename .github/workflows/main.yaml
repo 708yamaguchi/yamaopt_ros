@@ -22,14 +22,22 @@ jobs:
                 ADDITIONAL_DEBS: 'libspatialindex-dev freeglut3-dev libsuitesparse-dev libblas-dev liblapack-dev'
                 ROSDEP_SKIP_KEYS: 'fetcheus'
         steps:
-            # - name: Setup python
-            #   uses: actions/setup-python@v2
-            #   with:
-            #       python-version: 2.7
             - name: Checkout Code
               uses: actions/checkout@v2
               with:
                 submodules: recursive # Checkout yamaopt as git submodule
+
+            - name: Cache ros data
+              uses: actions/cache@v2
+              env:
+                cache-name: cache-ros-data
+              with:
+                # rosbag data is installed at ~/.ros/data
+                path: ~/.ros/data
+                key: cache-ros-data-${{ hashFiles('**/package-lock.json') }}
+                restore-keys: |
+                  cache-ros-data-
+
             - name: Setup ROS
               uses: 'ros-industrial/industrial_ci@master'
               env: ${{matrix.ros-env}}
