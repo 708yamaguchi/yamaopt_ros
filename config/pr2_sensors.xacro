@@ -5,5 +5,14 @@
 
   <xacro:include filename="$(arg orig_urdf)"/>
 
+  <!-- Add AI camera frame, which is the best measurement position for AI camera -->
+  <joint name="ai_camera_joint" type="fixed">
+    <!-- AI camera should be 0.5[m] away from target -->
+    <origin rpy="0 0 0" xyz="0 0 0.5" />
+    <parent link="r_gripper_tool_frame" />
+    <child link="ai_camera_frame" />
+  </joint>
+  <link name="ai_camera_frame" />
+
   <!-- TODO: add sensor links to pr2's original links -->
 </robot>

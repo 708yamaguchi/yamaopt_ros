@@ -1,5 +1,7 @@
+# How to create pr2 urdf with sensor frames (pr2_sensors.urdf)
+# $ catkin build
+
 urdf_path: ~/.skrobot/pr2_description/pr2_sensors.urdf
-optimization_frame: base_link # currently unused
 control_joint_names: [
     r_shoulder_pan_joint, 
     r_shoulder_lift_joint,
@@ -9,3 +11,4 @@ control_joint_names: [
     r_wrist_flex_joint, 
     r_wrist_roll_joint]
 endeffector_link_name: r_gripper_tool_frame
+optimization_frame: ai_camera_frame
