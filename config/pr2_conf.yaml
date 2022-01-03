@@ -1,4 +1,4 @@
-urdf_path: ~/.skrobot/pr2_description/pr2.urdf
+urdf_path: ~/.skrobot/pr2_description/pr2_sensors.urdf
 optimization_frame: base_link # currently unused
 control_joint_names: [
     r_shoulder_pan_joint, 

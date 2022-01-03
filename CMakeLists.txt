@@ -21,6 +21,19 @@ endif()
 # Download sample rosbag data
 add_custom_target(${PROJECT_NAME}_download_sample_data ALL
   COMMAND ${PROJECT_SOURCE_DIR}/scripts/download_sample_data.py)
+message("Download sample data to ${PROJECT_SOURCE_DIR}/data")
+
+# Create urdf of robots with sensors
+foreach(ROBOT pr2 fetch)
+  set(SKROBOT_DIR $ENV{HOME}/.skrobot)
+  set(IN_XACRO ${PROJECT_SOURCE_DIR}/config/${ROBOT}_sensors.xacro)
+  set(OUT_URDF ${SKROBOT_DIR}/${ROBOT}_description/${ROBOT}_sensors.urdf)
+  add_custom_command(OUTPUT ${OUT_URDF}
+    COMMAND xacro ${IN_XACRO} orig_urdf:=${SKROBOT_DIR}/${ROBOT}_description/${ROBOT}.urdf > ${OUT_URDF}
+    DEPENDS ${IN_XACRO})
+  add_custom_target(compile_${ROBOT} ALL DEPENDS ${OUT_URDF})
+  message("Create URDF of ${ROBOT} with sensors under ${OUT_URDF}")
+endforeach()
 
 # Install yamaopt_ros with catkin
 find_package(catkin REQUIRED COMPONENTS

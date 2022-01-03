@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<robot name="fetch" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:arg name="orig_urdf" default="" />
+
+  <xacro:include filename="$(arg orig_urdf)"/>
+
+  <!-- TODO: add sensor links to fetch's original links -->
+</robot>
