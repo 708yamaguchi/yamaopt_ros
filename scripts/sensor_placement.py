@@ -65,18 +65,37 @@ class CalcSensorPlacement(object):
             polygon_list.append(polygon)
         return polygon_list
 
+    def coefficients_to_coefficient_list(self, coefficients):
+        """
+        Args:
+            coefficients (jsk_recognition_msgs/ModelCoefficientsArray)
+
+        Returns:
+            coefficient_list (list of numpy array 3d points):
+        """
+        coefficient_list = []
+        for coefficient in coefficients.coefficients:
+            coefficient_list.append(coefficient.values)
+        return np.array(coefficient_list)
+
     def solve(self, req):
         rospy.loginfo("Calculate sensor placement.")
         # Polygons and target pos
         polygons = self.polygon_array_to_polygon_list(req.polygon_array)
+        coefficients = self.coefficients_to_coefficient_list(req.coefficients)
+        rospy.logerr(1111)
+        rospy.logerr(coefficients)
+        normals = coefficients[:, :3] * -1
+        rospy.logerr(normals)
+        rospy.logerr(coefficients)
         target_obj_pos = req.target_point
         target_obj_pos = np.array(
             [target_obj_pos.x, target_obj_pos.y, target_obj_pos.z])
         # Solve optimization
         q_init = -np.ones(len(self.kinsol.control_joint_ids)) * 0.4
         sol = self.kinsol.solve_multiple(
-            q_init, polygons, target_obj_pos, d_hover=self.d_hover,
-            joint_limit_margin=self.joint_limit_margin)
+            q_init, polygons, target_obj_pos, normals=normals,
+            d_hover=self.d_hover, joint_limit_margin=self.joint_limit_margin)
         success = sol.success
         if not success:
             rospy.logerr('Sensor placement SQP optimization failed.')
@@ -99,7 +118,8 @@ class CalcSensorPlacement(object):
         if self.visualize:
             vm = VisManager(self.config)
             vm.add_target(target_obj_pos)
-            vm.reflect_solver_result(sol, polygons, show_polygon_axis=True)
+            vm.reflect_solver_result(
+                sol, polygons, normals=normals, show_polygon_axis=True)
             vm.show_while()
         return res
 

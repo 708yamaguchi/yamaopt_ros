@@ -13,6 +13,7 @@
   (let ((req (instance yamaopt_ros::SensorPlacementRequest :init))
         (target-point (instance geometry_msgs::Point :init))
         (accum-polygons (instance jsk_recognition_msgs::PolygonArray :init))
+        (accum-coefs (instance jsk_recognition_msgs::ModelCoefficientsArray :init))
         res res-joint-names res-angle-vector res-base-pose)
     ;; Clear accumlated polygons
     (ros::service-call "/accum_polygons/clear_polygons"
@@ -26,13 +27,18 @@
       (send accum-polygons :header (send (send res :polygon_array) :header))
       (send accum-polygons :polygons
             (append (send accum-polygons :polygons)
-                    (send (send res :polygon_array) :polygons))))
+                    (send (send res :polygon_array) :polygons)))
+      (send accum-coefs :header (send (send res :polygon_array) :header))
+      (send accum-coefs :coefficients
+            (append (send accum-coefs :coefficients)
+                    (send (send res :coefficients) :coefficients))))
     ;; Send sensor placement request
     (send target-point :x 1.0)
     (send target-point :y 0.3)
     (send target-point :z 1.0)
     (send req :target_point target-point)
     (send req :polygon_array accum-polygons)
+    (send req :coefficients accum-coefs)
     ;; Receive response
     (setq res (ros::service-call "sensor_placement" req))
     (setq res-joint-names
