@@ -1,2 +1,3 @@
 ---
 jsk_recognition_msgs/PolygonArray polygon_array
+jsk_recognition_msgs/ModelCoefficientsArray coefficients

@@ -10,6 +10,7 @@
   <!-- Accumulate polygon array -->
   <node pkg="yamaopt_ros" type="accum_polygons.py" name="accum_polygons">
     <remap from="~input" to="/polygon_array_transformer/output_polygons" />
+    <remap from="~input_coefficients" to="/polygon_array_transformer/output_coefficients" />
     <rosparam>
       max_polygon_len: 100
     </rosparam>
