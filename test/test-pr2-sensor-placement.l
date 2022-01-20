@@ -14,6 +14,7 @@
         (target-point (instance geometry_msgs::Point :init))
         (accum-polygons (instance jsk_recognition_msgs::PolygonArray :init))
         (accum-coefs (instance jsk_recognition_msgs::ModelCoefficientsArray :init))
+        (movable-polygon (instance geometry_msgs::PolygonStamped :init))
         res res-joint-names res-angle-vector res-base-pose)
     ;; Clear accumlated polygons
     (ros::service-call "/accum_polygons/clear_polygons"
@@ -32,6 +33,13 @@
       (send accum-coefs :coefficients
             (append (send accum-coefs :coefficients)
                     (send (send res :coefficients) :coefficients))))
+    ;; Set movable area of PR2
+    (send movable-polygon :polygon
+          (instance geometry_msgs::Polygon :init :points
+                    (list (instance geometry_msgs::Point32 :init :x 1.0 :y 1.0 :z 0.0)
+                          (instance geometry_msgs::Point32 :init :x -1.0 :y 1.0 :z 0.0)
+                          (instance geometry_msgs::Point32 :init :x -1.0 :y -1.0 :z 0.0)
+                          (instance geometry_msgs::Point32 :init :x 1.0 :y -1.0 :z 0.0))))
     ;; Send sensor placement request
     (send target-point :x 1.0)
     (send target-point :y 0.3)
@@ -39,6 +47,7 @@
     (send req :target_point target-point)
     (send req :polygon_array accum-polygons)
     (send req :coefficients accum-coefs)
+    (send req :movable_polygon movable-polygon)
     ;; Receive response
     (setq res (ros::service-call "sensor_placement" req))
     (setq res-joint-names

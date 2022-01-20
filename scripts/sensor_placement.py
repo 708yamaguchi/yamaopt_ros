@@ -83,6 +83,11 @@ class CalcSensorPlacement(object):
         # Polygons and target pos
         polygons = self.polygon_array_to_polygon_list(req.polygon_array)
         coefficients = self.coefficients_to_coefficient_list(req.coefficients)
+        movable_polygon = None  # if movable_polygon is not given, set None
+        movable_points = req.movable_polygon.polygon.points
+        if len(movable_points) != 0:
+            movable_polygon = np.array(
+                [[point.x, point.y, point.z] for point in movable_points])
         normals = coefficients[:, :3] * -1
         target_obj_pos = req.target_point
         target_obj_pos = np.array(
@@ -91,6 +96,7 @@ class CalcSensorPlacement(object):
         q_init = -np.ones(len(self.kinsol.control_joint_ids)) * 0.4
         sol = self.kinsol.solve_multiple(
             q_init, polygons, target_obj_pos, normals=normals,
+            movable_polygon=movable_polygon,
             d_hover=self.d_hover, joint_limit_margin=self.joint_limit_margin)
         success = sol.success
         if not success:
@@ -115,7 +121,8 @@ class CalcSensorPlacement(object):
             vm = VisManager(self.config)
             vm.add_target(target_obj_pos)
             vm.reflect_solver_result(
-                sol, polygons, normals=normals, show_polygon_axis=True)
+                sol, polygons, movable_polygon=movable_polygon,
+                normals=normals, show_polygon_axis=True)
             vm.show_while()
         return res
 
