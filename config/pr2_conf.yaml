@@ -1,6 +1,7 @@
 urdf_path: ~/.skrobot/pr2_description/pr2.urdf
 optimization_frame: base_link # currently unused
 control_joint_names: [
+    # Note that we do not use torso
     r_shoulder_pan_joint, 
     r_shoulder_lift_joint,
     r_upper_arm_roll_joint,

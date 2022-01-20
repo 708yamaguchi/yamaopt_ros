@@ -18,11 +18,11 @@
     (setq accum-polygons (car tmp))
     (setq accum-coefs (cadr tmp))
     (setq movable-polygon
-          (movable-area->msg (list (list 1.0 1.0 0)
+          (movable-area->msg (list (list 4.0 1.0 0)
                                    (list -1.0 1.0 0)
                                    (list -1.0 -1.0 0)
-                                   (list 1.0 -1.0 0))))
-    (setq target-point (target-point->msg (list 1.0 0.3 1.0)))
+                                   (list 4.0 -1.0 0))))
+    (setq target-point (target-point->msg (list 2.0 -0.8 1.0)))
     ;; set request variable
     (send req :polygon_array accum-polygons)
     (send req :coefficients accum-coefs)
@@ -30,12 +30,8 @@
     (send req :target_point target-point)
     ;; Receive response
     (setq res (ros::service-call "sensor_placement" req))
-    (setq res-joint-names
-          (mapcar #'(lambda (x) (send x :data)) (send res :joint_names)))
-    (setq res-angle-vector
-          (concatenate float-vector
-                       (mapcar #'(lambda (x) (rad2deg (send x :data))) (send res :angle_vector))))
-    (setq res-base-pose (ros::tf-pose->coords (send res :base_pose)))
+    (setq res-angle-vector (calc-res-angle-vector res))
+    (setq res-base-pose (calc-res-base-pose res))
     ;; Move fetch
     (send *fetch* :rarm :angle-vector res-angle-vector)
     (send *fetch* :move-to res-base-pose)
