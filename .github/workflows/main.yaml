@@ -33,11 +33,13 @@ jobs:
                 # Temporary to pass test. Remove after yamaopt's requirements update
                 BEFORE_RUN_TARGET_TEST:
                     pip install numpy==1.16.6
-                # Install fetcheus in UPSTREAM_WORKSPACE
-                UPSTREAM_WORKSPACE: 'yamaopt.rosinstall'
+                # If you want to install fetcheus in UPSTREAM_WORKSPACE, comment in this line
+                # (However, in that case, you need to add alot of ROSDEP_SKIP_KEYS ...)
+                # UPSTREAM_WORKSPACE: 'yamaopt.rosinstall'
                 ADDITIONAL_DEBS: |
                     # Installing skrobot on Python 2.x
                     libspatialindex-dev freeglut3-dev libsuitesparse-dev libblas-dev liblapack-dev
+                # Do not use fetcheus in GitHub Action
                 ROSDEP_SKIP_KEYS: 'fetcheus'
 
         steps:
