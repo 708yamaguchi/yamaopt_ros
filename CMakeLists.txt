@@ -51,4 +51,5 @@ catkin_package(
 if(CATKIN_ENABLE_TESTING)
   find_package(catkin REQUIRED COMPONENTS rostest)
   add_rostest(test/test_pr2_sensor_placement.test ARGS gui:=false)
+  add_rostest(test/test_fetch_sensor_placement.test ARGS gui:=false)
 endif()
