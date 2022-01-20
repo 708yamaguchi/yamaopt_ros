@@ -11,7 +11,7 @@
 (deftest test-pr2-sensor-placement
   (let ((req (instance yamaopt_ros::SensorPlacementRequest :init))
         tmp accum-polygons accum-coefs movable-polygon target-point
-        res res-joint-names res-angle-vector res-base-pose)
+        res res-angle-vector res-base-pose)
     ;; calculate request information for /sensor_placement service
     (clear-accumulated-polygons)
     (setq tmp (get-accumulated-polygons))
@@ -28,14 +28,10 @@
     (send req :coefficients accum-coefs)
     (send req :movable_polygon movable-polygon)
     (send req :target_point target-point)
-    ;; Receive response
+    ;; Receive response (angle vector and base pose)
     (setq res (ros::service-call "sensor_placement" req))
-    (setq res-joint-names
-          (mapcar #'(lambda (x) (send x :data)) (send res :joint_names)))
-    (setq res-angle-vector
-          (concatenate float-vector
-                       (mapcar #'(lambda (x) (rad2deg (send x :data))) (send res :angle_vector))))
-    (setq res-base-pose (ros::tf-pose->coords (send res :base_pose)))
+    (setq res-angle-vector (calc-res-angle-vector res))
+    (setq res-base-pose (calc-res-base-pose res))
     ;; Move PR2
     (send *pr2* :rarm :angle-vector res-angle-vector)
     (send *pr2* :move-to res-base-pose)

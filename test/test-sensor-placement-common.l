@@ -43,3 +43,11 @@ input: list of points indicating movable polygon. For example,
 (defun target-point->msg (point)
   (instance geometry_msgs::Point :init
             :x (elt point 0) :y (elt point 1) :z (elt point 2)))
+
+(defun calc-res-angle-vector (res)
+  (concatenate float-vector
+               (mapcar #'(lambda (x) (rad2deg (send x :data)))
+                       (send res :angle_vector))))
+
+(defun calc-res-base-pose (res)
+  (ros::tf-pose->coords (send res :base_pose)))
