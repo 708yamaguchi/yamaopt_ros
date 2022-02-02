@@ -1,4 +1,10 @@
+# This package
 - git:
-    local-name: jsk_robot
+    local-name: 708yamaguchi/yamaopt_ros
+    uri: https://github.com/708yamaguchi/yamaopt_ros.git
+    version: master
+# Dependencies
+- git:
+    local-name: jsk-ros-pkg/jsk_robot
     uri: https://github.com/jsk-ros-pkg/jsk_robot.git
     version: master

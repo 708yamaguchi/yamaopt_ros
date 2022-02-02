@@ -10,8 +10,7 @@ Create ROS workspace for yamaopt.
 mkdir yamaopt_ws/src -p
 cd yamaopt_ws/src
 wstool init .
-wstool set --git yamaopt_ros https://github.com/708yamaguchi/yamaopt_ros.git # This package
-wstool merge -t . https://raw.githubusercontent.com/708yamaguchi/yamaopt_ros/master/yamaopt.rosinstall # Upstream packages
+wstool merge -t . https://raw.githubusercontent.com/708yamaguchi/yamaopt_ros/master/yamaopt.rosinstall
 wstool update -t .
 
 # Prepare for Installing yamaopt. The latest document is https://github.com/HiroIshida/yamaopt
