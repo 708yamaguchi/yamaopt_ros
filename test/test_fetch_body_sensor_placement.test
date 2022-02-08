@@ -1,0 +1,33 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node pkg="yamaopt_ros" name="pub_robot_plane" type="pub-robot-plane.l" />
+
+  <!-- Accumulate polygon array -->
+  <node pkg="yamaopt_ros" type="accum_polygons.py" name="accum_polygons">
+    <remap from="~input" to="/polygon_array_transformer/output_polygons" />
+    <remap from="~input_coefficients" to="/polygon_array_transformer/output_coefficients" />
+    <rosparam>
+      max_polygon_len: 100
+    </rosparam>
+  </node>
+
+  <!-- Server to calculate sensor placement optimization -->
+  <node pkg="yamaopt_ros" type="sensor_placement.py" name="sensor_placement" output="screen">
+    <rosparam subst_value="true">
+      robot_name: fetch
+      use_base: false
+      d_hover: 0.05
+      visualize: $(arg gui)
+    </rosparam>
+  </node>
+
+  <!-- Client to calculate sensor placement optimization -->
+  <test pkg="yamaopt_ros" type="test-fetch-sensor-placement.l" test-name="sensor_placement_client">
+    <rosparam subst_value="true">
+      visualize: $(arg gui)
+    </rosparam>
+  </test>
+
+</launch>

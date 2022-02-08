@@ -53,4 +53,5 @@ if(CATKIN_ENABLE_TESTING)
   add_rostest(test/test_pr2_sensor_placement.test ARGS gui:=false)
   # Currently, we do not test fetch in GitHub Action
   # add_rostest(test/test_fetch_sensor_placement.test ARGS gui:=false)
+  # add_rostest(test/test_fetch_body_sensor_placement.test ARGS gui:=false)
 endif()
