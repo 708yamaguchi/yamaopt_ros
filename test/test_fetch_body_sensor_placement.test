@@ -24,7 +24,7 @@
   </node>
 
   <!-- Client to calculate sensor placement optimization -->
-  <test pkg="yamaopt_ros" type="test-fetch-sensor-placement.l" test-name="sensor_placement_client">
+  <test pkg="yamaopt_ros" type="test-fetch-sensor-placement.l" test-name="test_fetch_body_sensor_placement">
     <rosparam subst_value="true">
       visualize: $(arg gui)
     </rosparam>
