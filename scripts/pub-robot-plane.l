@@ -100,25 +100,25 @@
           (send (fetch-link-coords "head_pan_link") :translate #f(70 -145 50))
           :world)
     (send head-left :copy-worldcoords)
-    (setq head-left-coef (float-vector 0 1 0 (* -1 (elt (send head-left :worldpos) 1))))
+    (setq head-left-coef (float-vector 0 -1 0 (* 1 (elt (send head-left :worldpos) 1))))
     ;; head-right
     (setq head-right (make-cube 180 5 80))
     (send head-right :transform
           (send (fetch-link-coords "head_pan_link") :translate #f(70 145 50))
           :world)
-    (setq head-right-coef (float-vector 0 -1 0 (elt (send head-right :worldpos) 1)))
+    (setq head-right-coef (float-vector 0 1 0 (* -1 (elt (send head-right :worldpos) 1))))
     ;; torso-left
     (setq torso-left (make-cube 100 5 480))
     (send torso-left :transform
           (send (fetch-link-coords "torso_lift_link") :translate #f(-50 -180 260))
           :world)
-    (setq torso-left-coef (float-vector 0 1 0 (* -1 (elt (send torso-left :worldpos) 1))))
+    (setq torso-left-coef (float-vector 0 -1 0 (* 1 (elt (send torso-left :worldpos) 1))))
     ;; torso-right
     (setq torso-right (make-cube 100 5 480))
     (send torso-right :transform
           (send (fetch-link-coords "torso_lift_link") :translate #f(-50 180 260))
           :world)
-    (setq torso-right-coef (float-vector 0 -1 0 (elt (send torso-right :worldpos) 1)))
+    (setq torso-right-coef (float-vector 0 1 0 (* -1 (elt (send torso-right :worldpos) 1))))
     ;; torso-back
     (setq torso-back (make-cube 5 200 500))
     (send torso-back :transform
