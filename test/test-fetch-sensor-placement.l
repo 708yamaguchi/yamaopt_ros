@@ -22,7 +22,8 @@
                                    (list -1.0 1.0 0)
                                    (list -1.0 -1.0 0)
                                    (list 4.0 -1.0 0))))
-    (setq target-point (target-point->msg (list 2.0 -0.8 1.0)))
+    (setq target-point (target-point->msg (list 1.0 -0.2 1.0)))
+    ;; (setq target-point (target-point->msg (list 1.0 2.0 1.2)))
     ;; set request variable
     (send req :polygon_array accum-polygons)
     (send req :coefficients accum-coefs)
