@@ -34,6 +34,7 @@ class AccumPolygons:
         with self.lock:
             if self.current_polygons is None:
                 polygons = []
+                coefs = []
             else:
                 polygons = self.current_polygons['polygon'].polygons
                 coefs = self.current_polygons['coef'].coefficients
