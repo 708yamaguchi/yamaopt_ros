@@ -1,0 +1,61 @@
+<launch>
+  <arg name="use_rosbag" default="false" />
+  <arg name="rosbag" />
+  <arg name="gui" default="true" />
+
+  <include if="$(arg use_rosbag)"
+           file="$(find yamaopt_ros)/launch/pr2_rosbag_play.launch">
+    <arg name="rosbag" value="$(arg rosbag)" />
+  </include>
+
+  <!-- Attention clipper for broom -->
+  <node name="pub_broom_box_array" pkg="yamaopt_ros" type="pub-broom-box-array.l" />
+  <node name="attention_clipper_for_broom"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/AttentionClipper">
+    <remap from="~input/points" to="/kinect_head/depth_registered/throttled/points" />
+    <remap from="~input" to="/kinect_head/depth_registered/throttled/camera_info" />
+    <remap from="~input/box_array" to="/broom_box_array" />
+    <rosparam>
+      frame_id: base_footprint
+      use_multiple_attention: true
+    </rosparam>
+  </node>
+  <node name="extract_indices_for_broom"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ExtractIndices">
+    <remap from="~input" to="/kinect_head/depth_registered/throttled/points" />
+    <remap from="~indices" to="attention_clipper_for_broom/output/point_indices" />
+    <rosparam>
+      <!-- for OrganizedMultiplanesegmentation -->
+      keep_organized: true
+    </rosparam>
+  </node>
+  <!-- Plane detection -->
+  <node name="organized_multi_plane_segmentation_for_broom"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/OrganizedMultiPlaneSegmentation">
+    <remap from="~input" to="extract_indices_for_broom/output"/>
+    <rosparam>
+      min_size: 30
+      publish_normal: true
+    </rosparam>
+  </node>
+  <!-- Convert Polygon Array -->
+  <node name="broom_polygon_array_transformer"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/PolygonArrayTransformer">
+    <remap from="~input_polygons"
+           to="/organized_multi_plane_segmentation_for_broom/output_polygon"/>
+    <remap from="~input_coefficients"
+           to="/organized_multi_plane_segmentation_for_broom/output_coefficients"/>
+    <rosparam>
+      frame_id: /base_footprint
+    </rosparam>
+  </node>
+
+  <!-- TODO: Create yamaopt_ros's rviz config -->
+  <node pkg="rviz" type="rviz" name="$(anon rviz)" if="$(arg gui)"
+        args="-d $(find yamaopt_ros)/config/pr2_broom.rviz" />
+
+</launch>
