@@ -1,0 +1,59 @@
+<!-- This file should be used with real PR2 robot. -->
+<!-- Please launch this file in the local PC with rossetmaster pr1040 -->
+
+<launch>
+  <!-- Nodes which subscribe pointcloud should be launched inside PR1040 -->
+  <machine name="pr1040" user="yamaguchi" address="pr1040.jsk.imi.i.u-tokyo.ac.jp" env-loader="/home/applications/ros/indigo/devel/env.sh" />
+
+  <arg name="gui" value="true" />
+
+  <!-- Plane extraction (Inside the PR2) -->
+  <node name="organized_multi_plane_segmentation"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/OrganizedMultiPlaneSegmentation"
+        machine="pr1040">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      publish_normal: true
+    </rosparam>
+  </node>
+
+  <!-- Convert Polygon Array -->
+  <node name="polygon_array_transformer"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/PolygonArrayTransformer">
+    <remap from="~input_polygons"
+           to="/organized_multi_plane_segmentation/output_polygon"/>
+    <remap from="~input_coefficients"
+           to="/organized_multi_plane_segmentation/output_coefficients"/>
+    <rosparam>
+      frame_id: /base_footprint
+    </rosparam>
+  </node>
+
+  <!-- Accumulate polygon array -->
+  <!-- Please call /accum_polygons/accum_polygons to accumulate polygons -->
+  <node pkg="yamaopt_ros" type="accum_polygons.py" name="accum_polygons">
+    <remap from="~input" to="/polygon_array_transformer/output_polygons" />
+    <remap from="~input_coefficients" to="/polygon_array_transformer/output_coefficients" />
+    <rosparam>
+      max_polygon_len: 100
+    </rosparam>
+  </node>
+
+  <!-- Server to calculate sensor placement optimization -->
+  <!-- Please call /sensor_placement to calculate sensor placement -->
+  <node pkg="yamaopt_ros" type="sensor_placement.py" name="sensor_placement" output="screen">
+    <rosparam subst_value="true">
+      robot_name: pr2
+      use_base: true
+      d_hover: 0.05
+      visualize: $(arg gui)
+    </rosparam>
+  </node>
+
+  <!-- Simplest client to calculate sensor placement optimization (For testing purpose) -->
+  <node pkg="yamaopt_ros" type="sample-sensor-placement-client.l" name="sample_sensor_placement_client"
+        output="screen" args="&quot;(main)&quot;" />
+
+</launch>
