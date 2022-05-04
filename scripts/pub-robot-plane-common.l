@@ -1,18 +1,10 @@
 #!/usr/bin/env roseus
 
-;; TODO: get real robot angle vector
-
-;; (load "package://fetcheus/fetch-interface.l")
-(load "package://fetcheus/fetch-utils.l")
-
-;; (fetch-init)
-(fetch)
-(ros::roseus "hoge")
-;; (send *fetch* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t))
-
 (ros::load-ros-manifest "geometry_msgs")
 (ros::load-ros-manifest "pcl_msgs")
 (ros::load-ros-manifest "jsk_recognition_msgs")
+
+(ros::roseus "pub_robot_plane")
 
 ;; Publish topic which has the same name as plane polygon topic from pointcloud
 (defvar *polygon-topic-name* "/polygon_array_transformer/output_polygons")
@@ -77,72 +69,24 @@
          (vec2 (point->float-vector (elt points 2))))
     (triangle-normal vec0 vec1 vec2)))
 
-(defun fetch-link-coords (coords-name)
-  (let ((links (send *fetch* :links)))
+(defun robot-link-coords (robot coords-name)
+  (let ((links (send robot :links)))
     (dolist (l links)
       (when (equal (send l :name) coords-name)
-        (return-from fetch-link-coords (send l :copy-worldcoords)))))
-  (return-from fetch-link-coords nil))
+        (return-from robot-link-coords (send l :copy-worldcoords)))))
+  (return-from robot-link-coords nil))
 
-(defun fetch-attachable-cubes ()
-  (let (cubes head-tilt head-left head-right torso-left torso-right torso-back base-top
-        coefs head-tilt-coef head-left-coef head-right-coef torso-left-coef torso-right-coef torso-back-coef base-top-coef)
-    ;; head-tilt
-    (setq head-tilt (make-cube 80 240 5))
-    (send head-tilt :transform
-          (send (fetch-link-coords "head_tilt_link") :translate #f(0 0 60))
-          :world)
-    (send head-tilt :copy-worldcoords)
-    (setq head-tilt-coef (float-vector 0 0 1 (* -1 (elt (send head-tilt :worldpos) 2))))
-    ;; head-left
-    (setq head-left (make-cube 180 5 80))
-    (send head-left :transform
-          (send (fetch-link-coords "head_pan_link") :translate #f(70 -145 50))
-          :world)
-    (send head-left :copy-worldcoords)
-    (setq head-left-coef (float-vector 0 -1 0 (* 1 (elt (send head-left :worldpos) 1))))
-    ;; head-right
-    (setq head-right (make-cube 180 5 80))
-    (send head-right :transform
-          (send (fetch-link-coords "head_pan_link") :translate #f(70 145 50))
-          :world)
-    (setq head-right-coef (float-vector 0 1 0 (* -1 (elt (send head-right :worldpos) 1))))
-    ;; torso-left
-    (setq torso-left (make-cube 100 5 480))
-    (send torso-left :transform
-          (send (fetch-link-coords "torso_lift_link") :translate #f(-50 -180 260))
-          :world)
-    (setq torso-left-coef (float-vector 0 -1 0 (* 1 (elt (send torso-left :worldpos) 1))))
-    ;; torso-right
-    (setq torso-right (make-cube 100 5 480))
-    (send torso-right :transform
-          (send (fetch-link-coords "torso_lift_link") :translate #f(-50 180 260))
-          :world)
-    (setq torso-right-coef (float-vector 0 1 0 (* -1 (elt (send torso-right :worldpos) 1))))
-    ;; torso-back
-    (setq torso-back (make-cube 5 200 500))
-    (send torso-back :transform
-          (send (fetch-link-coords "torso_lift_link") :translate #f(-190 0 260))
-          :world)
-    (setq torso-back-coef (float-vector -1 0 0 (elt (send torso-back :worldpos) 0)))
-    ;; base-top
-    (setq base-top (make-cube 130 200 5))
-    (send base-top :transform
-          (send (fetch-link-coords "base_link") :translate #f(200 0 360))
-          :world)
-    (setq base-top-coef (float-vector 0 0 1 (* -1 (elt (send base-top :worldpos) 0))))
-    ;; set color to cubes and visualize
-    (setq cubes (list head-tilt head-left head-right torso-left torso-right torso-back base-top))
-    (setq coefs (list head-tilt-coef head-left-coef head-right-coef torso-left-coef torso-right-coef torso-back-coef base-top-coef))
-    (dolist (p cubes)
-      (send p :set-color #f(0.8 0 0)))
-    (objects (append (list *fetch*) cubes))
-    (list cubes coefs)
-    ))
+(defun robot-attachable-cubes (robot)
+  (cond
+   ((eq robot *fetch*)
+    (fetch-attachable-cubes))
+   ((eq robot *pr2*)
+    (pr2-attachable-cubes))
+   ))
 
-(defun pub-robot-plane ()
+(defun pub-robot-plane (robot)
   (let* ((polygon-array (instance jsk_recognition_msgs::PolygonArray :init))
-         (cubes-and-coefs (fetch-attachable-cubes))
+         (cubes-and-coefs (robot-attachable-cubes robot))
          (cubes (car cubes-and-coefs))
          (polygons (mapcar #'cube->polygon-stamped cubes))
          (coefs (cadr cubes-and-coefs))
@@ -158,13 +102,3 @@
     (send coef-array :header :stamp stamp)
     (ros::publish *coef-topic-name* coef-array)
     ))
-
-(defun main ()
-  ;; TODO: set appropriate rate
-  (ros::rate 10)
-  (do-until-key
-   (pub-robot-plane)
-   (ros::spin-once)
-   (ros::sleep)))
-
-(main)
