@@ -12,7 +12,8 @@ from yamaopt.visualizer import VisManager
 import rospkg
 import rospy
 from std_msgs.msg import Bool, Float32, String
-from yamaopt_ros.srv import SensorPlacement, SensorPlacementResponse
+from yamaopt_ros.srv import SensorPlacement
+from yamaopt_ros.srv import SensorPlacementRequest, SensorPlacementResponse
 
 
 class CalcSensorPlacement(object):
@@ -42,6 +43,13 @@ class CalcSensorPlacement(object):
         self.robot_orig.load_urdf_file(urdf_path)
         # Advertise Service
         rospy.Service('sensor_placement', SensorPlacement, self.solve)
+        # Publish service request and response for rosbag record
+        # Tricky because the message types are for rosservice. But it works.
+        self.request_pub = rospy.Publisher(
+            '/sensor_placement/request', SensorPlacementRequest, queue_size=10)
+        self.response_pub = rospy.Publisher(
+            '/sensor_placement/response', SensorPlacementResponse,
+            queue_size=10)
 
     def polygon_array_to_polygon_list(self, polygon_array):
         """
@@ -116,6 +124,9 @@ class CalcSensorPlacement(object):
         res.angle_vector = [Float32(i) for i in av]
         res.base_pose = tf_utils.coords_to_geometry_pose(sp.robot.coords())
         res.success = Bool(data=success)
+        # Publish request and response as rostopic for rosbag record
+        self.request_pub.publish(req)
+        self.response_pub.publish(res)
         # Visualize in scikit-robot
         if self.visualize:
             vm = VisManager(self.config)

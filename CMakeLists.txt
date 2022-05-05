@@ -37,6 +37,12 @@ add_service_files(
   AccumulatePolygons.srv
   )
 
+add_message_files(
+  FILES
+  SensorPlacementRequest.msg
+  SensorPlacementResponse.msg
+  )
+
 generate_messages(
   DEPENDENCIES
   geometry_msgs
