@@ -5,9 +5,10 @@
   <!-- Nodes which subscribe pointcloud should be launched inside PR1040 -->
   <machine name="pr1040" user="yamaguchi" address="pr1040.jsk.imi.i.u-tokyo.ac.jp" env-loader="/home/applications/ros/indigo/devel/env.sh" />
 
+  <arg name="use_base" value="true" />
   <arg name="gui" value="true" />
 
-  <!-- Plane extraction (Inside the PR2) -->
+  <!-- Plane extraction (Launched inside the PR2) -->
   <node name="organized_multi_plane_segmentation"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_pcl/OrganizedMultiPlaneSegmentation"
@@ -46,7 +47,7 @@
   <node pkg="yamaopt_ros" type="sensor_placement.py" name="sensor_placement" output="screen">
     <rosparam subst_value="true">
       robot_name: pr2
-      use_base: true
+      use_base: $(arg use_base)
       d_hover: 0.05
       visualize: $(arg gui)
     </rosparam>
