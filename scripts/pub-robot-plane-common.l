@@ -78,9 +78,9 @@
 
 (defun robot-attachable-cubes (robot)
   (cond
-   ((eq robot *fetch*)
+   ((and (boundp '*fetch*) (eq robot *fetch*))
     (fetch-attachable-cubes))
-   ((eq robot *pr2*)
+   ((and (boundp '*pr2*) (eq robot *pr2*))
     (pr2-attachable-cubes))
    ))
 

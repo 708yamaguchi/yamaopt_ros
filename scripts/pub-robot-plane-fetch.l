@@ -1,19 +1,18 @@
 #!/usr/bin/env roseus
 
-;; TODO: get real robot angle vector
-
 (load "package://yamaopt_ros/scripts/pub-robot-plane-common.l")
-
 (load "package://fetcheus/fetch-interface.l")
-;; (load "package://fetcheus/fetch-utils.l")
 
 (fetch-init)
-;; (fetch)
 (send *fetch* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t))
 
 (defun fetch-attachable-cubes ()
-  (let (cubes head-tilt head-left head-right torso-left torso-right torso-back base-top
-        coefs head-tilt-coef head-left-coef head-right-coef torso-left-coef torso-right-coef torso-back-coef base-top-coef)
+  (let (cubes head-tilt head-left head-right
+              torso-left torso-right torso-back base-top
+              hand-top hand-bottom
+        coefs head-tilt-coef head-left-coef head-right-coef
+              torso-left-coef torso-right-coef torso-back-coef base-top-coef
+              hand-top-coef hand-bottom-coef)
     ;; head-tilt
     (setq head-tilt (make-cube 80 240 5))
     (send head-tilt :transform
@@ -58,9 +57,38 @@
           (send (robot-link-coords *fetch* "base_link") :translate #f(200 0 360))
           :world)
     (setq base-top-coef (float-vector 0 0 1 (* -1 (elt (send base-top :worldpos) 0))))
+    ;; hand-top
+    (setq hand-top (make-cube 100 100 5))
+    (send hand-top :transform
+          (send (robot-link-coords *fetch* "wrist_roll_link") :translate #f(80 0 45))
+          :world)
+    (send hand-top :worldcoords)
+    (let ((normal (send (elt (send hand-top :faces) 1) :normal)) ;; 1 is -z axis face
+          (pos (send hand-top :worldpos)))
+      (setq hand-top-coef
+            (float-vector (elt normal 0) (elt normal 1) (elt normal 2)
+                          (* -1 (v. normal pos)))))
+    ;; hand-bottom
+    (setq hand-bottom (make-cube 100 100 5))
+    (send hand-bottom :transform
+          (send (robot-link-coords *fetch* "wrist_roll_link") :translate #f(80 0 -45))
+          :world)
+    (send hand-bottom :worldcoords)
+    (let ((normal (send (elt (send hand-bottom :faces) 0) :normal)) ;; 0 is z axis face
+          (pos (send hand-bottom :worldpos)))
+      (setq hand-bottom-coef
+            (float-vector (elt normal 0) (elt normal 1) (elt normal 2)
+                          (* -1 (v. normal pos)))))
+
     ;; set color to cubes and visualize
-    (setq cubes (list head-tilt head-left head-right torso-left torso-right torso-back base-top))
-    (setq coefs (list head-tilt-coef head-left-coef head-right-coef torso-left-coef torso-right-coef torso-back-coef base-top-coef))
+    (setq cubes (list head-tilt head-left head-right
+                      torso-left torso-right torso-back base-top
+                      hand-top hand-bottom
+                      ))
+    (setq coefs (list head-tilt-coef head-left-coef head-right-coef
+                      torso-left-coef torso-right-coef torso-back-coef base-top-coef
+                      hand-top-coef hand-bottom-coef
+                      ))
     (dolist (p cubes)
       (send p :set-color #f(0.8 0 0)))
     (objects (append (list *fetch*) cubes))
