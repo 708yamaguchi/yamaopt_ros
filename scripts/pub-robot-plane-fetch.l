@@ -97,11 +97,11 @@
 
 (defun main ()
   ;; TODO: set appropriate rate
-  (ros::rate 10)
+  (ros::rate 1)
   (do-until-key
    (pub-robot-plane *fetch*)
    (ros::spin-once)
    (ros::sleep)
    (x::window-main-one)))
 
-(main)
+;; (main)

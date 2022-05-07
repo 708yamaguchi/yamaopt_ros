@@ -118,7 +118,6 @@
                       arm-left-1 arm-left-2 arm-right-1 arm-right-2
                       torso-left torso-right torso-back-1 torso-back-2
                       base-top-left base-top-right))
-    (print arm-left-1-coef)
     (setq coefs (list head-tilt-coef head-left-coef head-right-coef
                       arm-left-1-coef arm-left-2-coef arm-right-1-coef arm-right-2-coef
                       torso-left-coef torso-right-coef torso-back-1-coef torso-back-2-coef
@@ -131,11 +130,11 @@
 
 (defun main ()
   ;; TODO: set appropriate rate
-  (ros::rate 10)
+  (ros::rate 1)
   (do-until-key
    (pub-robot-plane *pr2*)
    (ros::spin-once)
    (ros::sleep)
    (x::window-main-one)))
 
-(main)
+;; (main)
