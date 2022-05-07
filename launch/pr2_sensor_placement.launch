@@ -53,8 +53,12 @@
     </rosparam>
   </node>
 
-  <!-- Simplest client to calculate sensor placement optimization (For testing purpose) -->
-  <node pkg="yamaopt_ros" type="sample-sensor-placement-client.l" name="sample_sensor_placement_client"
+  <!-- Publish plane and coef of PR2 body -->
+  <node pkg="yamaopt_ros" type="pub-robot-plane-pr2.l" name="pub_robot_plane_pr2"
         output="screen" args="&quot;(main)&quot;" />
+
+  <!-- Simplest client to calculate sensor placement optimization (For testing purpose) -->
+  <!-- <node pkg="yamaopt_ros" type="sample-sensor-placement-client.l" name="sample_sensor_placement_client" -->
+  <!--       output="screen" args="&quot;(main)&quot;" /> -->
 
 </launch>
