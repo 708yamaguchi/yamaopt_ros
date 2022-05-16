@@ -1,18 +1,18 @@
 (ros::load-ros-manifest "yamaopt_ros")
 (ros::load-ros-manifest "jsk_recognition_msgs")
 
-(defun clear-accumulated-polygons ()
-  (ros::service-call "/accum_polygons/clear_polygons"
+(defun clear-accumulated-polygons (&optional (namespace "accum_polygons"))
+  (ros::service-call (format nil "/~A/clear_polygons" namespace)
                      (instance yamaopt_ros::AccumulatePolygonsRequest :init)))
 
-(defun get-accumulated-polygons ()
+(defun get-accumulated-polygons (&optional (namespace "accum_polygons"))
   (let ((accum-polygons (instance jsk_recognition_msgs::PolygonArray :init))
         (accum-coefs (instance jsk_recognition_msgs::ModelCoefficientsArray :init))
         res)
   (dotimes (i 5)
     (unix:sleep 2)
     (setq res
-          (ros::service-call "/accum_polygons/accum_polygons"
+          (ros::service-call (format nil "/~A/accum_polygons" namespace)
                              (instance yamaopt_ros::AccumulatePolygonsRequest :init)))
     (send accum-polygons :header (send (send res :polygon_array) :header))
     (send accum-polygons :polygons
