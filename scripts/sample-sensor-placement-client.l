@@ -9,8 +9,8 @@
         tmp accum-polygons accum-coefs movable-polygon target-point
         res res-angle-vector res-base-pose)
     ;; calculate request information for /sensor_placement service
-    (clear-accumulated-polygons)
-    (setq tmp (get-accumulated-polygons))
+    (clear-accumulated-polygons "accum_polygons_vision")
+    (setq tmp (get-accumulated-polygons "accum_polygons_vision"))
     (setq accum-polygons (car tmp))
     (setq accum-coefs (cadr tmp))
     (setq movable-polygon

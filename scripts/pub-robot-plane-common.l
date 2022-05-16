@@ -7,8 +7,8 @@
 (ros::roseus "pub_robot_plane")
 
 ;; Publish topic which has the same name as plane polygon topic from pointcloud
-(defvar *polygon-topic-name* "/polygon_array_transformer/output_polygons")
-(defvar *coef-topic-name* "/polygon_array_transformer/output_coefficients")
+(defvar *polygon-topic-name* "/robot_plane/output_polygons")
+(defvar *coef-topic-name* "/robot_plane/output_coefficients")
 (ros::advertise *polygon-topic-name* jsk_recognition_msgs::PolygonArray)
 (ros::advertise *coef-topic-name* jsk_recognition_msgs::ModelCoefficientsArray)
 
