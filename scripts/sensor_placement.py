@@ -51,6 +51,14 @@ class CalcSensorPlacement(object):
             '/sensor_placement/response', SensorPlacementResponse,
             queue_size=10)
 
+    def set_angle_vector(self, robot, angle_vector, target_joints):
+        current_av = robot.angle_vector()
+        for av, tj in zip(angle_vector, target_joints):
+            for i, j in enumerate(robot.joint_list):
+                if tj.data == j.name:
+                    current_av[i] = av.data
+        robot.angle_vector(current_av)
+
     def polygon_array_to_polygon_list(self, polygon_array):
         """
         Args:
@@ -131,6 +139,10 @@ class CalcSensorPlacement(object):
         if self.visualize:
             vm = VisManager(self.config)
             vm.add_target(target_obj_pos)
+            # Reflect current PR2's angle vector
+            self.set_angle_vector(
+                vm.robot, req.angle_vector, req.joint_names)
+            # Reflect sensor placement angle vector
             vm.reflect_solver_result(
                 sol, polygons, movable_polygon=movable_polygon,
                 normals=normals, show_polygon_axis=True)

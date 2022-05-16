@@ -46,17 +46,39 @@
                   (send accum-res-body :coefficients :coefficients)))
     (send coef-array :header (send accum-res-body :coefficients :header))
     ;; Set /sensor_placement request and response
+    (send *pr2* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t))
     (let ((req (instance yamaopt_ros::SensorPlacementRequest :init))
           (movable-polygon (movable-area->msg (list (list 1.5 1.5 0)
                                                     (list -1.5 1.5 0)
                                                     (list -1.5 -1.5 0)
                                                     (list 1.5 -1.5 0))))
           (target-point (target-point->msg (list 1.0 0.3 1.0)))
+          (arm-right (concatenate cons (send *pr2* :rarm :angle-vector)))
+          (torso (list (send *pr2* :torso :waist-z :joint-angle)))
+          (neck (list (send *pr2* :head :neck-y :joint-angle)
+                      (send *pr2* :head :neck-p :joint-angle)))
+          req-angle-vector req-joint-names
           res res-angle-vector res-base-pose)
       (send req :polygon_array polygon-array)
       (send req :coefficients coef-array)
       (send req :movable_polygon movable-polygon)
       (send req :target_point target-point)
+      (setq req-angle-vector
+            (append
+             (mapcar #'(lambda (x) (instance std_msgs::Float32 :init :data (deg2rad x)))
+                     arm-right)
+             (mapcar #'(lambda (x) (instance std_msgs::Float32 :init :data (/ x 1000.0)))
+                     torso)
+             (mapcar #'(lambda (x) (instance std_msgs::Float32 :init :data (deg2rad x)))
+                     neck)))
+      (send req :angle_vector req-angle-vector)
+      (setq req-joint-names
+            (append (mapcar #'(lambda (x) (send x :name)) (send *pr2* :rarm :joint-list))
+                    (mapcar #'(lambda (x) (send x :name)) (send *pr2* :torso :joint-list))
+                    (mapcar #'(lambda (x) (send x :name)) (send *pr2* :head :joint-list))))
+      (setq req-joint-names
+            (mapcar #'(lambda (x) (instance std_msgs::String :init :data x)) req-joint-names))
+      (send req :joint_names req-joint-names)
       ;; Service call /sensor_placement
       (setq res (ros::service-call "sensor_placement" req))
       (setq res-angle-vector (calc-res-angle-vector res))
