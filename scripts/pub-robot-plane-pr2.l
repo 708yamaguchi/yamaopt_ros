@@ -19,29 +19,42 @@
     (setq head-tilt (make-cube 200 240 5))
     (send head-tilt :transform
           (send (robot-link-coords *pr2* "head_tilt_link") :translate #f(-50 0 160))
-          :world)
-    (send head-tilt :copy-worldcoords)
-    (setq head-tilt-coef (float-vector 0 0 1 (* -1 (elt (send head-tilt :worldpos) 2))))
+          :local)
+    (send head-tilt :worldcoords)
+    (let ((normal (send (elt (send head-tilt :faces) 1) :normal)) ;; 1 is -z axis face
+          (pos (send head-tilt :worldpos)))
+      (setq head-tilt-coef
+            (float-vector (elt normal 0) (elt normal 1) (elt normal 2)
+                          (* -1 (v. normal pos)))))
     ;; head-left
     (setq head-left (make-cube 200 5 60))
     (send head-left :transform
           (send (robot-link-coords *pr2* "head_tilt_link") :translate #f(-50 -155 110))
-          :world)
-    (send head-left :copy-worldcoords)
-    (setq head-left-coef (float-vector 0 -1 0 (* 1 (elt (send head-left :worldpos) 1))))
+          :local)
+    (send head-left :worldcoords)
+    (let ((normal (send (elt (send head-left :faces) 4) :normal)) ;; 4 is -y axis face
+          (pos (send head-left :worldpos)))
+      (setq head-left-coef
+            (float-vector (elt normal 0) (elt normal 1) (elt normal 2)
+                          (* -1 (v. normal pos)))))
     ;; head-right
     (setq head-right (make-cube 200 5 60))
     (send head-right :transform
           (send (robot-link-coords *pr2* "head_tilt_link") :translate #f(-50 155 110))
-          :world)
-    (setq head-right-coef (float-vector 0 1 0 (* -1 (elt (send head-right :worldpos) 1))))
+          :local)
+    (send head-right :worldcoords)
+    (let ((normal (send (elt (send head-right :faces) 2) :normal)) ;; 2 is y axis face
+          (pos (send head-right :worldpos)))
+      (setq head-right-coef
+            (float-vector (elt normal 0) (elt normal 1) (elt normal 2)
+                          (* -1 (v. normal pos)))))
     ;; arm-left-1
     (setq arm-left-1 (make-cube 180 5 180))
     (send arm-left-1 :transform
           (send (robot-link-coords *pr2* "l_shoulder_pan_link") :translate #f(50 -130 0))
           :world)
     (send arm-left-1 :worldcoords)
-    (let ((normal (send (elt (send arm-left-1 :faces) 4) :normal)) ;; 2 is y axis face
+    (let ((normal (send (elt (send arm-left-1 :faces) 4) :normal)) ;; 4 is -y axis face
           (pos (send arm-left-1 :worldpos)))
       (setq arm-left-1-coef
             (float-vector (elt normal 0) (elt normal 1) (elt normal 2)
@@ -52,7 +65,7 @@
           (send (robot-link-coords *pr2* "l_shoulder_pan_link") :translate #f(50 130 0))
           :world)
     (send arm-left-2 :worldcoords)
-    (let ((normal (send (elt (send arm-left-2 :faces) 2) :normal)) ;; 4 is -y axis face
+    (let ((normal (send (elt (send arm-left-2 :faces) 2) :normal)) ;; 2 is y axis face
           (pos (send arm-left-2 :worldpos)))
       (setq arm-left-2-coef
             (float-vector (elt normal 0) (elt normal 1) (elt normal 2)
