@@ -51,13 +51,19 @@ class CalcSensorPlacement(object):
             '/sensor_placement/response', SensorPlacementResponse,
             queue_size=10)
 
-    def set_angle_vector(self, robot, angle_vector, target_joints):
+    def set_angle_vector_for_vis(self, robot, angle_vector, target_joints):
         current_av = robot.angle_vector()
         for av, tj in zip(angle_vector, target_joints):
             for i, j in enumerate(robot.joint_list):
                 if tj.data == j.name:
                     current_av[i] = av.data
         robot.angle_vector(current_av)
+
+    def set_angle_vector(self, angle_vector, target_joints):
+        joint_names = map(lambda x: x.data, target_joints)
+        joint_ids = self.kinsol.kin.get_joint_ids(joint_names)
+        angle_vectors = map(lambda x: x.data, angle_vector)
+        self.kinsol.kin.set_joint_angles(joint_ids, angle_vectors)
 
     def polygon_array_to_polygon_list(self, polygon_array):
         """
@@ -110,6 +116,8 @@ class CalcSensorPlacement(object):
             [target_obj_pos.x, target_obj_pos.y, target_obj_pos.z])
         # Solve optimization
         q_init = -np.ones(len(self.kinsol.control_joint_ids)) * 0.4
+        # Set current PR2 angle vector to solver
+        self.set_angle_vector(req.angle_vector, req.joint_names)
         sol = self.kinsol.solve_multiple(
             q_init, polygons, target_obj_pos, normals=normals,
             movable_polygon=movable_polygon,
@@ -140,7 +148,7 @@ class CalcSensorPlacement(object):
             vm = VisManager(self.config)
             vm.add_target(target_obj_pos)
             # Reflect current PR2's angle vector
-            self.set_angle_vector(
+            self.set_angle_vector_for_vis(
                 vm.robot, req.angle_vector, req.joint_names)
             # Reflect sensor placement angle vector
             vm.reflect_solver_result(
