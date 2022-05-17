@@ -7,6 +7,7 @@
   <node pkg="yamaopt_ros" type="sensor_placement.py" name="sensor_placement" output="screen">
     <rosparam subst_value="true">
       robot_name: pr2
+      arm: right
       use_base: false
       d_hover: 0.05
       visualize: true

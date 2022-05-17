@@ -13,7 +13,11 @@
   (let ((neck-p-y (list (list 40 0) (list -40 0) (list 0 20) (list 0 -20)))
         (polygon-array (instance jsk_recognition_msgs::PolygonArray :init))
         (coef-array (instance jsk_recognition_msgs::ModelCoefficientsArray :init))
-        accum-res-vision accum-res-robot)
+        accum-res-vision accum-res-robot arm-name target-arm)
+    ;; Get target arm
+    (setq arm-name (ros::get-param "~arm" "right"))
+    (cond ((equal arm-name "right") (setq target-arm :rarm))
+          ((equal arm-name "left") (setq target-arm :larm)))
     ;; Get vision planes
     (clear-accumulated-polygons "accum_polygons_vision")
     (dolist (p-y neck-p-y)
@@ -52,8 +56,8 @@
                                                     (list -1.5 1.5 0)
                                                     (list -1.5 -1.5 0)
                                                     (list 1.5 -1.5 0))))
-          (target-point (target-point->msg (list 1.0 0.3 1.0)))
-          (arm-right (concatenate cons (send *pr2* :rarm :angle-vector)))
+          (target-point (target-point->msg (list 0.5 0.3 1.1)))
+          (arm-right (concatenate cons (send *pr2* target-arm :angle-vector)))
           (torso (list (send *pr2* :torso :waist-z :joint-angle)))
           (neck (list (send *pr2* :head :neck-y :joint-angle)
                       (send *pr2* :head :neck-p :joint-angle)))
@@ -73,7 +77,7 @@
                      neck)))
       (send req :angle_vector req-angle-vector)
       (setq req-joint-names
-            (append (mapcar #'(lambda (x) (send x :name)) (send *pr2* :rarm :joint-list))
+            (append (mapcar #'(lambda (x) (send x :name)) (send *pr2* target-arm :joint-list))
                     (mapcar #'(lambda (x) (send x :name)) (send *pr2* :torso :joint-list))
                     (mapcar #'(lambda (x) (send x :name)) (send *pr2* :head :joint-list))))
       (setq req-joint-names
@@ -85,7 +89,8 @@
       ;; Service call /sensor_placement
       (setq res (ros::service-call "sensor_placement" req))
       (setq res-angle-vector (calc-res-angle-vector res))
-      (send *pr2* :rarm :angle-vector res-angle-vector)
+      (send *pr2* target-arm :angle-vector res-angle-vector)
+      (ros::ros-info (format nil "~A angle-vector: ~A" target-arm res-angle-vector))
       (objects (list *pr2*))
       (setq res-base-pose (calc-res-base-pose res))
     )))

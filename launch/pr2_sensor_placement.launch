@@ -6,6 +6,7 @@
   <machine name="pr1040" user="yamaguchi" address="pr1040.jsk.imi.i.u-tokyo.ac.jp" env-loader="/home/applications/ros/indigo/devel/env.sh" />
 
   <arg name="use_base" default="true" />
+  <arg name="arm" default="right" />
   <arg name="gui" default="true" />
 
   <!-- Plane extraction (Launched inside the PR2) -->
@@ -52,9 +53,11 @@
 
   <!-- Server to calculate sensor placement optimization -->
   <!-- Please call /sensor_placement to calculate sensor placement -->
+  <!-- Set gui:=false when demo. The gui window stops the demo. -->
   <node pkg="yamaopt_ros" type="sensor_placement.py" name="sensor_placement" output="screen">
     <rosparam subst_value="true">
       robot_name: pr2
+      arm: $(arg arm)
       use_base: $(arg use_base)
       d_hover: 0.05
       visualize: $(arg gui)
@@ -70,7 +73,12 @@
   <!--       output="screen" args="&quot;(main)&quot;" /> -->
 
   <!-- Client to calculate sensor placement optimization with vision and robot planes -->
-  <node pkg="yamaopt_ros" type="sample-sensor-placement-with-robot-body-client.l" name="sample_sensor_placement_client"
-        output="screen" args="&quot;(main)&quot;" />
+  <node pkg="yamaopt_ros" type="sample-sensor-placement-with-robot-body-client.l"
+        name="sample_sensor_placement_client"
+        output="screen" args="&quot;(main)&quot;" >
+    <rosparam subst_value="true">
+      arm: $(arg arm)
+    </rosparam>
+  </node>
 
 </launch>
