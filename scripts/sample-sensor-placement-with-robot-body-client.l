@@ -79,6 +79,9 @@
       (setq req-joint-names
             (mapcar #'(lambda (x) (instance std_msgs::String :init :data x)) req-joint-names))
       (send req :joint_names req-joint-names)
+      ;; Save request for debugging without real PR2
+      (setq req-global req)
+      (dump-loadable-structure "req-global.l" req-global)
       ;; Service call /sensor_placement
       (setq res (ros::service-call "sensor_placement" req))
       (setq res-angle-vector (calc-res-angle-vector res))
