@@ -82,5 +82,7 @@
       ;; Service call /sensor_placement
       (setq res (ros::service-call "sensor_placement" req))
       (setq res-angle-vector (calc-res-angle-vector res))
+      (send *pr2* :rarm :angle-vector res-angle-vector)
+      (objects (list *pr2*))
       (setq res-base-pose (calc-res-base-pose res))
     )))

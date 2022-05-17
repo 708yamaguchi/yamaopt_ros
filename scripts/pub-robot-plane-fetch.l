@@ -3,6 +3,8 @@
 (load "package://yamaopt_ros/scripts/pub-robot-plane-common.l")
 (load "package://fetcheus/fetch-interface.l")
 
+(setq *viewer* t)
+
 (fetch-init)
 (send *fetch* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t))
 
@@ -91,17 +93,21 @@
                       ))
     (dolist (p cubes)
       (send p :set-color #f(0.8 0 0)))
-    (objects (append (list *fetch*) cubes))
+    (when *viewer*
+      (objects (append (list *fetch*) cubes)))
     (list cubes coefs)
     ))
 
-(defun main ()
+(defun main (&optional (gui t))
+  (setq *viewer* gui)
   ;; TODO: set appropriate rate
   (ros::rate 1)
   (do-until-key
    (pub-robot-plane *fetch*)
    (ros::spin-once)
    (ros::sleep)
-   (x::window-main-one)))
+   (when *viewer*
+     (x::window-main-one))
+   ))
 
 ;; (main)
