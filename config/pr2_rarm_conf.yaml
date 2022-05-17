@@ -10,5 +10,5 @@ control_joint_names: [
     r_wrist_flex_joint, 
     r_wrist_roll_joint]
 endeffector_link_name: r_gripper_tool_frame
-optframe_xyz_from_ef: [0.0, 0.0, 1.0]
+optframe_xyz_from_ef: [0.0, 0.0, 0.7]
 optframe_rpy_from_ef: [0.0, 0.0, 0.0]

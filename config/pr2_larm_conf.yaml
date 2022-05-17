@@ -1,0 +1,14 @@
+urdf_path: ~/.skrobot/pr2_description/pr2.urdf
+optimization_frame: base_link # currently unused
+control_joint_names: [
+    # Note that we do not use torso
+    l_shoulder_pan_joint, 
+    l_shoulder_lift_joint,
+    l_upper_arm_roll_joint,
+    l_elbow_flex_joint,
+    l_forearm_roll_joint,
+    l_wrist_flex_joint, 
+    l_wrist_roll_joint]
+endeffector_link_name: l_gripper_tool_frame
+optframe_xyz_from_ef: [0.0, 0.0, 0.7]
+optframe_rpy_from_ef: [0.0, 0.0, 0.0]

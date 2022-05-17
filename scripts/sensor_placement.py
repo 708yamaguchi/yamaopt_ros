@@ -20,6 +20,7 @@ class CalcSensorPlacement(object):
     def __init__(self):
         # Get rosparam
         robot_name = rospy.get_param('~robot_name', 'pr2')
+        arm = rospy.get_param('~arm', 'right')
         use_base = rospy.get_param('~use_base', True)
         self.d_hover = rospy.get_param('~d_hover', 0.05)
         self.joint_limit_margin = rospy.get_param('~joint_limit_margin', 5.0)
@@ -29,7 +30,14 @@ class CalcSensorPlacement(object):
         if robot_name == 'fetch':
             config_path = r.get_path('yamaopt_ros') + "/config/fetch_conf.yaml"
         elif robot_name == 'pr2':
-            config_path = r.get_path('yamaopt_ros') + "/config/pr2_conf.yaml"
+            if arm == 'right':
+                config_path = r.get_path(
+                    'yamaopt_ros') + "/config/pr2_rarm_conf.yaml"
+            elif arm == 'left':
+                config_path = r.get_path(
+                    'yamaopt_ros') + "/config/pr2_larm_conf.yaml"
+            else:
+                rospy.logerr("'~arm' param is right or left.")
         else:
             raise Exception()
         self.config = SolverConfig.from_config_path(

@@ -54,7 +54,7 @@ if __name__ == '__main__':
     if robot_name == 'fetch':
         config_path = r.get_path('yamaopt_ros') + "/config/fetch_conf.yaml"
     elif robot_name == 'pr2':
-        config_path = r.get_path('yamaopt_ros') + "/config/pr2_conf.yaml"
+        config_path = r.get_path('yamaopt_ros') + "/config/pr2_rarm_conf.yaml"
     else:
         raise Exception()
 
