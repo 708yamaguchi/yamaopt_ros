@@ -100,8 +100,7 @@
 
 (defun main (&optional (gui t))
   (setq *viewer* gui)
-  ;; TODO: set appropriate rate
-  (ros::rate 1)
+  (ros::rate 10)
   (do-until-key
    (pub-robot-plane *fetch*)
    (ros::spin-once)
