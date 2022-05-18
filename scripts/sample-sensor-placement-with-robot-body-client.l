@@ -52,10 +52,13 @@
     ;; Set /sensor_placement request and response
     (send *pr2* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t))
     (let ((req (instance yamaopt_ros::SensorPlacementRequest :init))
-          (movable-polygon (movable-area->msg (list (list 1.5 1.5 0)
-                                                    (list -1.5 1.5 0)
-                                                    (list -1.5 -1.5 0)
-                                                    (list 1.5 -1.5 0))))
+          (movable-polygon (movable-area->msg
+                            ;; (list (list 1.5 1.5 0)
+                            ;;       (list -1.5 1.5 0)
+                            ;;       (list -1.5 -1.5 0)
+                            ;;       (list 1.5 -1.5 0))
+                            nil ;; Do not use movable polygon
+                            ))
           (target-point (target-point->msg (list 0.5 0.3 1.1)))
           (arm-left (concatenate cons (send *pr2* :larm :angle-vector)))
           (arm-right (concatenate cons (send *pr2* :rarm :angle-vector)))
