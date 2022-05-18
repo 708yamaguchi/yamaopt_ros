@@ -8,12 +8,17 @@
 (load "package://yamaopt_ros/data/req-global.l")
 
 (ros::wait-for-service "sensor_placement")
-(setq res (ros::service-call "sensor_placement" req-global))
-(setq res-angle-vector (calc-res-angle-vector res))
-(setq res-base-pose (calc-res-base-pose res))
 
-(pr2)
-(print res-angle-vector)
-;; Note that angle-vector except rarm is not reflected
-(send *pr2* :rarm :angle-vector res-angle-vector)
-(objects (list *pr2*))
+(let* ((res (ros::service-call "sensor_placement" req-global))
+       (res-angle-vector (calc-res-angle-vector res))
+       (res-base-pose (calc-res-base-pose res))
+       arm-name target-arm)
+  (pr2)
+  (print res-angle-vector)
+  (setq arm-name (ros::get-param "~arm" "right"))
+  (cond ((equal arm-name "right") (setq target-arm :rarm))
+        ((equal arm-name "left") (setq target-arm :larm)))
+  ;; Note that angle-vector except rarm is not reflected
+  (send *pr2* target-arm :angle-vector res-angle-vector)
+  (objects (list *pr2*))
+  )
