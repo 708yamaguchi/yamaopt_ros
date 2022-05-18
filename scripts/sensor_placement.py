@@ -59,7 +59,12 @@ class CalcSensorPlacement(object):
             '/sensor_placement/response', SensorPlacementResponse,
             queue_size=10)
 
-    def set_angle_vector_for_vis(self, robot, angle_vector, target_joints):
+    def set_angle_vector_for_skrobot(self, robot, angle_vector, target_joints):
+        """
+        Args:
+            angle_vector: std_msgs/Float32[]
+            target_joints: std_msgs/String[]
+        """
         current_av = robot.angle_vector()
         for av, tj in zip(angle_vector, target_joints):
             for i, j in enumerate(robot.joint_list):
@@ -68,10 +73,37 @@ class CalcSensorPlacement(object):
         robot.angle_vector(current_av)
 
     def set_angle_vector(self, angle_vector, target_joints):
+        """
+        Args:
+            angle_vector: std_msgs/Float32[]
+            target_joints: std_msgs/String[]
+        """
         joint_names = map(lambda x: x.data, target_joints)
         joint_ids = self.kinsol.kin.get_joint_ids(joint_names)
         angle_vectors = map(lambda x: x.data, angle_vector)
         self.kinsol.kin.set_joint_angles(joint_ids, angle_vectors)
+
+    def clamp_angle_vector(self, joint_list, angle_vector, target_joints):
+        """
+        Args:
+            joint_list: List of scikit-robot's RotationalJoint and LinearJoint
+            angle_vector: Input angle vector (std_msgs/Float32[])
+            target_joints: Joint names
+                           according to angle_vector (std_msgs/String[])
+
+        Returns:
+            ret: Clamed angle vecor (std_msgs/Float32[])
+        """
+        ret = []
+        for av, tj in zip(angle_vector, target_joints):
+            for j in joint_list:
+                if tj.data == j.name:
+                    if j.max_angle == float('inf'):
+                        clamped_angle = av.data % (2 * np.pi)
+                    else:
+                        clamped_angle = av.data
+                    ret.append(Float32(clamped_angle))
+        return ret
 
     def polygon_array_to_polygon_list(self, polygon_array):
         """
@@ -145,7 +177,9 @@ class CalcSensorPlacement(object):
             av = sol.x[:-3]
         else:
             av = sol.x
-        res.angle_vector = [Float32(i) for i in av]
+        # Clamp angle vector between -2*pi and 2*pi
+        res.angle_vector = self.clamp_angle_vector(
+            self.robot.joint_list, [Float32(i) for i in av], res.joint_names)
         res.base_pose = tf_utils.coords_to_geometry_pose(sp.robot.coords())
         res.success = Bool(data=success)
         # Publish request and response as rostopic for rosbag record
@@ -156,7 +190,7 @@ class CalcSensorPlacement(object):
             vm = VisManager(self.config)
             vm.add_target(target_obj_pos)
             # Reflect current PR2's angle vector
-            self.set_angle_vector_for_vis(
+            self.set_angle_vector_for_skrobot(
                 vm.robot, req.angle_vector, req.joint_names)
             # Reflect sensor placement angle vector
             vm.reflect_solver_result(
