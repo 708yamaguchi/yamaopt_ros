@@ -57,7 +57,8 @@
                                                     (list -1.5 -1.5 0)
                                                     (list 1.5 -1.5 0))))
           (target-point (target-point->msg (list 0.5 0.3 1.1)))
-          (arm-right (concatenate cons (send *pr2* target-arm :angle-vector)))
+          (arm-left (concatenate cons (send *pr2* :larm :angle-vector)))
+          (arm-right (concatenate cons (send *pr2* :rarm :angle-vector)))
           (torso (list (send *pr2* :torso :waist-z :joint-angle)))
           (neck (list (send *pr2* :head :neck-y :joint-angle)
                       (send *pr2* :head :neck-p :joint-angle)))
@@ -70,6 +71,8 @@
       (setq req-angle-vector
             (append
              (mapcar #'(lambda (x) (instance std_msgs::Float32 :init :data (deg2rad x)))
+                     arm-left)
+             (mapcar #'(lambda (x) (instance std_msgs::Float32 :init :data (deg2rad x)))
                      arm-right)
              (mapcar #'(lambda (x) (instance std_msgs::Float32 :init :data (/ x 1000.0)))
                      torso)
@@ -77,7 +80,8 @@
                      neck)))
       (send req :angle_vector req-angle-vector)
       (setq req-joint-names
-            (append (mapcar #'(lambda (x) (send x :name)) (send *pr2* target-arm :joint-list))
+            (append (mapcar #'(lambda (x) (send x :name)) (send *pr2* :larm :joint-list))
+                    (mapcar #'(lambda (x) (send x :name)) (send *pr2* :rarm :joint-list))
                     (mapcar #'(lambda (x) (send x :name)) (send *pr2* :torso :joint-list))
                     (mapcar #'(lambda (x) (send x :name)) (send *pr2* :head :joint-list))))
       (setq req-joint-names
