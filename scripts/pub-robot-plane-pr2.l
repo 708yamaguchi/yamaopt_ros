@@ -129,12 +129,14 @@
           :world)
     (setq base-top-right-coef (float-vector 0 0 1 (* -1 (elt (send base-top-right :worldpos) 0))))
     ;; set color to cubes and visualize
+    ;; Do not publish arm planes because arm planes moves when robot arm moves
+    ;; (difficult to calculate sensor placement)
     (setq cubes (list head-tilt head-left head-right
-                      arm-left-1 arm-left-2 arm-right-1 arm-right-2
+                      ;; arm-left-1 arm-left-2 arm-right-1 arm-right-2
                       torso-left torso-right torso-back-1 torso-back-2
                       base-top-left base-top-right))
     (setq coefs (list head-tilt-coef head-left-coef head-right-coef
-                      arm-left-1-coef arm-left-2-coef arm-right-1-coef arm-right-2-coef
+                      ;; arm-left-1-coef arm-left-2-coef arm-right-1-coef arm-right-2-coef
                       torso-left-coef torso-right-coef torso-back-1-coef torso-back-2-coef
                       base-top-left-coef base-top-right-coef))
     (dolist (p cubes)
