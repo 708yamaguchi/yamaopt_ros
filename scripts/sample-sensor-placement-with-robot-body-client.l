@@ -8,7 +8,7 @@
 
 (pr2-init)
 
-(defun main()
+(defun search-sensor-placement ()
   ;; Accum polygon and coef
   (let ((neck-p-y (list (list 40 0) (list -40 0) (list 0 20) (list 0 -20)))
         (polygon-array (instance jsk_recognition_msgs::PolygonArray :init))
@@ -100,4 +100,5 @@
       (ros::ros-info (format nil "~A angle-vector: ~A" target-arm res-angle-vector))
       (objects (list *pr2*))
       (setq res-base-pose (calc-res-base-pose res))
-    )))
+      (return (send *pr2* :angle-vector))
+      )))

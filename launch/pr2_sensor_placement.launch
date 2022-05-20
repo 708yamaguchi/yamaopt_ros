@@ -79,7 +79,7 @@
   <!-- Client to calculate sensor placement optimization with vision and robot planes -->
   <node pkg="yamaopt_ros" type="sample-sensor-placement-with-robot-body-client.l"
         name="sample_sensor_placement_client" if="$(arg call_service)"
-        output="screen" args="&quot;(main)&quot;" >
+        output="screen" args="&quot;(search-sensor-placement)&quot;" >
     <rosparam subst_value="true">
       arm: $(arg arm)
     </rosparam>
