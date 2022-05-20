@@ -24,6 +24,7 @@ class CalcSensorPlacement(object):
         use_base = rospy.get_param('~use_base', True)
         self.d_hover = rospy.get_param('~d_hover', 0.05)
         self.joint_limit_margin = rospy.get_param('~joint_limit_margin', 5.0)
+        sensor_type = rospy.get_param('~sensor_type', "none")
         self.visualize = rospy.get_param('~visualize', False)
         # Optimization config
         r = rospkg.RosPack()
@@ -40,8 +41,18 @@ class CalcSensorPlacement(object):
                 rospy.logerr("'~arm' param is right or left.")
         else:
             raise Exception()
+        # Change optframe_xyz_from_ef based on /sensor_type topic.
+        if sensor_type == "none":
+            rospy.logwarn('Wait for /sensor_type topic to come ...')
+            msg = rospy.wait_for_message('/sensor_type', String, timeout=None)
+            sensor_type = msg.data
+        if sensor_type in ['ai_camera', 'thermography']:
+            optframe_xyz_from_ef = [0.0, 0.0, 0.6]
+        else:  # 'microphone' or 'co2_sensor':
+            optframe_xyz_from_ef = [0.0, 0.0, 0.0]
         self.config = SolverConfig.from_config_path(
-            config_path, use_base=use_base)
+            config_path, use_base=use_base,
+            optframe_xyz_from_ef=optframe_xyz_from_ef)
         self.kinsol = KinematicSolver(self.config)
         # Robot config
         urdf_path = os.path.expanduser(self.config.urdf_path)

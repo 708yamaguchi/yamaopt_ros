@@ -1,6 +1,7 @@
 <launch>
 
   <arg name="arm" default="left" />
+  <arg name="sensor_type" default="ai_camera" doc="If given, /sensor_placement node does not wait for /sensor_type topic" />
 
   <node pkg="yamaopt_ros" type="sample-sensor-placement-dump-request.l"
         name="sample_sensor_placement_client" output="screen">
@@ -18,6 +19,7 @@
       use_base: false
       d_hover: 0.05
       visualize: true
+      sensor_type: $(arg sensor_type)
     </rosparam>
   </node>
 

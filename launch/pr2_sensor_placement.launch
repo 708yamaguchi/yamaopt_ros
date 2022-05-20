@@ -9,6 +9,7 @@
   <arg name="arm" default="right" />
   <arg name="call_service" default="true"
        doc="If false, robot does not move and does not call /sensor_placement service"/>
+  <arg name="sensor_type" default="none" doc="If given, /sensor_placement node does not wait for /sensor_type topic" />
   <arg name="gui" default="true" />
 
   <!-- Plane extraction (Launched inside the PR2) -->
@@ -63,6 +64,7 @@
       use_base: $(arg use_base)
       d_hover: 0.05
       visualize: $(arg gui)
+      sensor_type: $(arg sensor_type)
     </rosparam>
   </node>
 
