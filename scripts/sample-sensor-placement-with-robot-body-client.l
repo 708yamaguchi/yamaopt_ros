@@ -102,3 +102,9 @@
       (setq res-base-pose (calc-res-base-pose res))
       (return (send *pr2* :angle-vector))
       )))
+
+;; TODO
+(defun place-sensor ()
+  (search-sensor-placement)
+  ;; Move *ri*
+  )
