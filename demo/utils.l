@@ -1,23 +1,26 @@
 #!/usr/bin/env roseus
 
+;; Curry demo. Need the following branch.
+;; https://github.com/708yamaguchi/jsk_demos/tree/kanazawa-bthesis-demo
+(load "package://jsk_2021_10_soup_from_boil/euslisp/motion/arrangement-at-arrange.l")
+(load "package://jsk_2021_10_soup_from_boil/euslisp/motion/ih-at-arrange.l")
+(load "package://jsk_2021_10_soup_from_boil/euslisp/motion/tool-at-arrange.l")
+
+;; yamaopt_ros
 (ros::load-ros-manifest "yamaopt_ros")
 (load "package://yamaopt_ros/test/test-sensor-placement-common.l")
 (load "package://yamaopt_ros/scripts/pub-robot-plane-pr2.l")
 
+;; Init node
 (ros::roseus "sensor_placement_client")
-
 (pr2-init)
 
-(defun search-sensor-placement ()
+(defun search-sensor-placement (target-arm)
   ;; Accum polygon and coef
   (let ((neck-p-y (list (list 40 0) (list -40 0) (list 0 20) (list 0 -20)))
         (polygon-array (instance jsk_recognition_msgs::PolygonArray :init))
         (coef-array (instance jsk_recognition_msgs::ModelCoefficientsArray :init))
-        accum-res-vision accum-res-robot arm-name target-arm)
-    ;; Get target arm
-    (setq arm-name (ros::get-param "~arm" "right"))
-    (cond ((equal arm-name "right") (setq target-arm :rarm))
-          ((equal arm-name "left") (setq target-arm :larm)))
+        accum-res-vision accum-res-robot)
     ;; Get vision planes
     (clear-accumulated-polygons "accum_polygons_vision")
     (dolist (p-y neck-p-y)
@@ -26,10 +29,12 @@
       (send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
       (send *ri* :wait-interpolation)
       ;; Add both robot body's plane and vision plane
-      (setq accum-res-vision
-            (ros::service-call "/accum_polygons_vision/accum_polygons"
-                               (instance yamaopt_ros::AccumulatePolygonsRequest :init)))
-      (unix:usleep (* 300 1000)))
+      (dotimes (i 3)
+        (setq accum-res-vision
+              (ros::service-call "/accum_polygons_vision/accum_polygons"
+                                 (instance yamaopt_ros::AccumulatePolygonsRequest :init)))
+        (unix:usleep (* 300 1000)))
+      )
     ;; Get robot body planes after looking at target point
     (send *pr2* :head :neck-p :joint-angle 30)
     (send *pr2* :head :neck-y :joint-angle 0)
@@ -59,7 +64,7 @@
                             ;;       (list 1.5 -1.5 0))
                             nil ;; Do not use movable polygon
                             ))
-          (target-point (target-point->msg (list 0.5 0.3 0.8)))
+          (target-point (target-point->msg (list 0.8 0.3 1.0)))
           (arm-left (concatenate cons (send *pr2* :larm :angle-vector)))
           (arm-right (concatenate cons (send *pr2* :rarm :angle-vector)))
           (torso (list (send *pr2* :torso :waist-z :joint-angle)))
@@ -100,11 +105,48 @@
       (ros::ros-info (format nil "~A angle-vector: ~A" target-arm res-angle-vector))
       (objects (list *pr2*))
       (setq res-base-pose (calc-res-base-pose res))
-      (return (send *pr2* :angle-vector))
+      (send *pr2* :angle-vector)
       )))
 
-;; TODO
 (defun place-sensor ()
-  (search-sensor-placement)
-  ;; Move *ri*
+  (let (arm-name target-arm av-ret)
+    ;; Get target arm
+    (setq arm-name (ros::get-param "~arm" "right"))
+    (cond ((equal arm-name "right") (setq target-arm :rarm))
+          ((equal arm-name "left") (setq target-arm :larm)))
+    ;; Move robot
+    (send *pr2* :reset-manip-pose)
+    (send *ri* :angle-vector (send *pr2* :angle-vector) 5000)
+    (send *ri* :wait-interpolation)
+    (send *pr2* :angle-vector (search-sensor-placement target-arm))
+    (send *pr2* :angle-vector)
+    (send *pr2* target-arm :move-end-pos #f(-50 0 0) :local :use-torso nil)
+    (send *ri* :angle-vector (send *pr2* :angle-vector) 5000)
+    (send *ri* :wait-interpolation)
+    ;; Push module to plane
+    (let (av avs tms)
+      (dotimes (i 10)
+        (send *pr2* target-arm :move-end-pos #f(10 0 0) :local)
+        (setq av (send *pr2* :angle-vector))
+        (setq avs (append avs (list av)))
+        (setq tms (append tms (list 400))))
+      (send *ri* :angle-vector-sequence avs tms))
+    (cancel-motion-when-touch :arm target-arm :direction :x :threshold -1.5)
+    ;; Push again
+    (let (av avs tms)
+      (dotimes (i 2)
+        (send *pr2* target-arm :move-end-pos #f(10 0 0) :local)
+        (setq av (send *pr2* :angle-vector))
+        (setq avs (append avs (list av)))
+        (setq tms (append tms (list 400))))
+      (send *ri* :angle-vector-sequence avs tms))
+    (send *ri* :wait-interpolation)
+    ;; Release module
+    (setq av-ret (send *ri* :state :potentio-vector))
+    (send *ri* :stop-grasp target-arm :wait t)
+    (send *pr2* target-arm :move-end-pos #f(-100 0 0) :local :use-torso nil)
+    (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
+    (send *ri* :wait-interpolation)
+    ;; Return PR2 angle-vector when touch
+    av-ret)
   )

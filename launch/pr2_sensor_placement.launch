@@ -7,7 +7,7 @@
 
   <arg name="use_base" default="true" />
   <arg name="arm" default="right" />
-  <arg name="call_service" default="true"
+  <arg name="move_robot" default="true"
        doc="If false, robot does not move and does not call /sensor_placement service"/>
   <arg name="sensor_type" default="none" doc="If given, /sensor_placement node does not wait for /sensor_type topic" />
   <arg name="gui" default="true" />
@@ -62,7 +62,7 @@
       robot_name: pr2
       arm: $(arg arm)
       use_base: $(arg use_base)
-      d_hover: 0.05
+      d_hover: 0.01
       visualize: $(arg gui)
       sensor_type: $(arg sensor_type)
     </rosparam>
@@ -77,9 +77,9 @@
   <!--       output="screen" args="&quot;(main)&quot;" /> -->
 
   <!-- Client to calculate sensor placement optimization with vision and robot planes -->
-  <node pkg="yamaopt_ros" type="sample-sensor-placement-with-robot-body-client.l"
-        name="sample_sensor_placement_client" if="$(arg call_service)"
-        output="screen" args="&quot;(search-sensor-placement)&quot;" >
+  <node pkg="yamaopt_ros" type="utils.l"
+        name="sample_sensor_placement_client" if="$(arg move_robot)"
+        output="screen" args="&quot;(place-sensor)&quot;" >
     <rosparam subst_value="true">
       arm: $(arg arm)
     </rosparam>

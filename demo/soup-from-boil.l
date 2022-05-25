@@ -1,10 +1,4 @@
-;; Need this branch
-;; https://github.com/708yamaguchi/jsk_demos/tree/kanazawa-bthesis-demo
-(load "package://jsk_2021_10_soup_from_boil/euslisp/motion/arrangement-at-arrange.l")
-(load "package://jsk_2021_10_soup_from_boil/euslisp/motion/ih-at-arrange.l")
-(load "package://jsk_2021_10_soup_from_boil/euslisp/motion/tool-at-arrange.l")
-
-(load "package://yamaopt_ros/sample/sample-sensor-placement-with-robot-body-client.l")
+(load "package://yamaopt_ros/demo/utils.l")
 
 ;; 準備：最初に換気扇とIHの電源を入れていく
 (ros::roseus "soup_from_boil" :anonymous t)
@@ -49,4 +43,7 @@
 
   ;; 冷ます
   (cool-soup)
+
+  ;; センサを取り外す
+  nil
   )
