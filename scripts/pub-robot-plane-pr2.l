@@ -130,15 +130,15 @@
             (float-vector (elt normal 0) (elt normal 1) (elt normal 2)
                           (* -1 (v. normal pos)))))
     ;; torso-left
-    (setq torso-left (make-cube 120 5 120))
+    (setq torso-left (make-cube 100 5 100))
     (send torso-left :transform
-          (send (robot-link-coords *pr2* "torso_lift_link") :translate #f(-10 -210 240))
+          (send (robot-link-coords *pr2* "torso_lift_link") :translate #f(0 -210 250))
           :world)
     (setq torso-left-coef (float-vector 0 -1 0 (* 1 (elt (send torso-left :worldpos) 1))))
     ;; torso-right
-    (setq torso-right (make-cube 120 5 120))
+    (setq torso-right (make-cube 100 5 100))
     (send torso-right :transform
-          (send (robot-link-coords *pr2* "torso_lift_link") :translate #f(-10 260 240))
+          (send (robot-link-coords *pr2* "torso_lift_link") :translate #f(0 260 250))
           :world)
     (setq torso-right-coef (float-vector 0 1 0 (* -1 (elt (send torso-right :worldpos) 1))))
     ;; torso-back 1
@@ -170,14 +170,14 @@
     ;; (difficult to calculate sensor placement)
     (setq cubes (list head-tilt ;; head-front
                       head-left head-right
-                      head-left-below head-right-below
+                      ;; head-left-below head-right-below
                       ;; arm-left-1 arm-left-2 arm-right-1 arm-right-2
                       torso-left torso-right torso-back-1 torso-back-2
                       base-top-left base-top-right
                       ))
     (setq coefs (list head-tilt-coef ;; head-front-coef
                       head-left-coef head-right-coef
-                      head-left-below-coef head-right-below-coef
+                      ;; head-left-below-coef head-right-below-coef
                       ;; arm-left-1-coef arm-left-2-coef arm-right-1-coef arm-right-2-coef
                       torso-left-coef torso-right-coef torso-back-1-coef torso-back-2-coef
                       base-top-left-coef base-top-right-coef

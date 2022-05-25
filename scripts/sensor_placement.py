@@ -23,7 +23,8 @@ class CalcSensorPlacement(object):
         arm = rospy.get_param('~arm', 'right')
         use_base = rospy.get_param('~use_base', True)
         self.d_hover = rospy.get_param('~d_hover', 0.05)
-        self.joint_limit_margin = rospy.get_param('~joint_limit_margin', 5.0)
+        self.joint_limit_margin = rospy.get_param(
+            '~joint_limit_margin', (15 / 180.0) * (2 * np.pi))
         sensor_type = rospy.get_param('~sensor_type', "none")
         self.visualize = rospy.get_param('~visualize', False)
         # Optimization config
@@ -47,7 +48,7 @@ class CalcSensorPlacement(object):
             msg = rospy.wait_for_message('/sensor_type', String, timeout=None)
             sensor_type = msg.data
         if sensor_type in ['ai_camera', 'thermography']:
-            optframe_xyz_from_ef = [0.0, 0.0, 0.6]
+            optframe_xyz_from_ef = [0.0, 0.0, 1.0]
         else:  # 'microphone' or 'co2_sensor':
             optframe_xyz_from_ef = [0.0, 0.0, 0.0]
         self.config = SolverConfig.from_config_path(
