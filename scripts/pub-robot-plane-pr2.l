@@ -3,7 +3,7 @@
 (load "package://yamaopt_ros/scripts/pub-robot-plane-common.l")
 (load "package://pr2eus/pr2-interface.l")
 
-(setq *viewer* t)
+(setq *create-viewer* t)
 
 (pr2-init)
 (send *pr2* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t))
@@ -184,19 +184,19 @@
                       ))
     (dolist (p cubes)
       (send p :set-color #f(0.8 0 0)))
-    (when *viewer*
+    (when *create-viewer*
       (objects (append (list *pr2*) cubes)))
     (list cubes coefs)
     ))
 
 (defun main (&optional (gui t))
-  (setq *viewer* gui)
+  (setq *create-viewer* gui)
   (ros::rate 10)
   (do-until-key
    (pub-robot-plane *pr2*)
    (ros::spin-once)
    (ros::sleep)
-   (when *viewer*
+   (when *create-viewer*
      (x::window-main-one))
    ))
 
