@@ -20,6 +20,9 @@
     <remap from="~input" to="/kinect_head/depth_registered/points"/>
     <rosparam>
       publish_normal: true
+      <!-- Not to speak PR2 -->
+      vital_rate: 0.01
+      always_subscribe: true
     </rosparam>
   </node>
 
