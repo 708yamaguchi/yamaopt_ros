@@ -62,7 +62,8 @@
       robot_name: pr2
       arm: $(arg arm)
       use_base: $(arg use_base)
-      d_hover: 0.01
+      d_hover: 0.05
+      polygon_shrink: 0.0
       visualize: $(arg gui)
       sensor_type: $(arg sensor_type)
     </rosparam>

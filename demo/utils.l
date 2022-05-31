@@ -64,7 +64,7 @@
                             ;;       (list 1.5 -1.5 0))
                             nil ;; Do not use movable polygon
                             ))
-          (target-point (target-point->msg (list 0.8 0.3 1.0)))
+          (target-point (target-point->msg (list 0.8 0.1 1.1)))
           (arm-left (concatenate cons (send *pr2* :larm :angle-vector)))
           (arm-right (concatenate cons (send *pr2* :rarm :angle-vector)))
           (torso (list (send *pr2* :torso :waist-z :joint-angle)))

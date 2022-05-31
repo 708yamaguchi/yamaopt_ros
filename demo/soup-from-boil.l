@@ -33,6 +33,7 @@
   (correct-ih-knob-coords)
 
   ;; センサ貼付け位置を探し、貼る
+  ;; TODO: angle vectorの中継地点を上手に設定しないと、鍋の取っ手に手が引っかかる
   (place-sensor)
 
   ;; 沸騰させる
@@ -41,9 +42,9 @@
   ;; お湯を注ぐ
   (pour-soup)
 
-  ;; 冷ます
+  ;; 冷ます <- TODO: 必要？
   (cool-soup)
 
-  ;; センサを取り外す
+  ;; TODO: センサを取り外す
   nil
   )
