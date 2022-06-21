@@ -22,7 +22,7 @@
     ;; head-tilt
     (setq head-tilt (make-cube 200 240 5))
     (send head-tilt :transform
-          (send (robot-link-coords *pr2* "head_tilt_link") :translate #f(-50 0 160))
+          (send (robot-link-coords *pr2* "head_tilt_link") :translate #f(-50 0 170))
           :local)
     (send head-tilt :worldcoords)
     (let ((normal (send (elt (send head-tilt :faces) 1) :normal)) ;; 1 is -z axis face
@@ -44,7 +44,7 @@
     ;; head-left
     (setq head-left (make-cube 150 5 50))
     (send head-left :transform
-          (send (robot-link-coords *pr2* "head_tilt_link") :translate #f(-70 -152 115))
+          (send (robot-link-coords *pr2* "head_tilt_link") :translate #f(-70 -160 115))
           :local)
     (send head-left :worldcoords)
     (let ((normal (send (elt (send head-left :faces) 4) :normal)) ;; 4 is -y axis face
@@ -55,7 +55,7 @@
     ;; head-right
     (setq head-right (make-cube 150 5 50))
     (send head-right :transform
-          (send (robot-link-coords *pr2* "head_tilt_link") :translate #f(-70 152 115))
+          (send (robot-link-coords *pr2* "head_tilt_link") :translate #f(-70 160 115))
           :local)
     (send head-right :worldcoords)
     (let ((normal (send (elt (send head-right :faces) 2) :normal)) ;; 2 is y axis face
@@ -132,13 +132,13 @@
     ;; torso-left
     (setq torso-left (make-cube 100 5 100))
     (send torso-left :transform
-          (send (robot-link-coords *pr2* "torso_lift_link") :translate #f(0 -210 250))
+          (send (robot-link-coords *pr2* "torso_lift_link") :translate #f(0 -220 250))
           :world)
     (setq torso-left-coef (float-vector 0 -1 0 (* 1 (elt (send torso-left :worldpos) 1))))
     ;; torso-right
     (setq torso-right (make-cube 100 5 100))
     (send torso-right :transform
-          (send (robot-link-coords *pr2* "torso_lift_link") :translate #f(0 260 250))
+          (send (robot-link-coords *pr2* "torso_lift_link") :translate #f(0 220 250))
           :world)
     (setq torso-right-coef (float-vector 0 1 0 (* -1 (elt (send torso-right :worldpos) 1))))
     ;; torso-back 1
