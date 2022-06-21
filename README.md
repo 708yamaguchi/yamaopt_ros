@@ -51,9 +51,11 @@ rosrun yamaopt_ros download_sample_data.py
     Sensor placement optimization with Kinematics Simulator.
 
     ```
-    # We need to set use_vision_plances to false because we cannot use vision data with Kinematics Simulator
-    # We need to give sensor_type because /sensor_type topic is not published in this case.
-    roslaunch yamaopt_ros pr2_sensor_placement.launch use_base:=false use_vision_planes:=false sensor_type:=ai_camera
+    # 1. Set use_vision_plances to false because we cannot use vision data with Kinematics Simulator
+    # 2. Because pub-robot-plane-pr2.l and utils.l cannot communicate with each other about *ri* information in Kinematics Simulator mode,
+    #    we need to give fixed robot pose to pub-robot-plane-pr2.l according *ri* pose in utils.l code.
+    # 3. Give sensor_type because /sensor_type topic is not published in this case.
+    roslaunch yamaopt_ros pr2_sensor_placement.launch use_base:=false use_vision_planes:=false fix_robot_planes:=true sensor_type:=ai_camera
     ```
 
     Sensor placement optimization via rosservice using PR2 rosbag (old?)

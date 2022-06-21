@@ -40,6 +40,7 @@
           (unix:usleep (* 300 1000)))))
     ;; Get robot body planes after looking at target point
     (when use-robot-planes
+      (send *pr2* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t))
       (send *pr2* :head :neck-p :joint-angle 30)
       (send *pr2* :head :neck-y :joint-angle 0)
       (send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
@@ -112,6 +113,11 @@
       (send *pr2* :angle-vector)
       )))
 
+;; TODO: we need to create function for PR2 to change module grasping axis
+;; e.g. PR2 puts the module on its body, then PR2 grasps the module from the different direction.
+;; (defun change-grasp-direction ())
+
+;; TODO: we need to add information about handling axis (x or z)
 (defun place-sensor ()
   (let (arm-name target-arm av-ret)
     ;; Get target arm

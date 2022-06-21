@@ -99,14 +99,19 @@
     ))
 
 (defun main (&optional (gui t))
-  (setq *create-viewer* gui)
-  (ros::rate 10)
-  (do-until-key
-   (pub-robot-plane *fetch*)
-   (ros::spin-once)
-   (ros::sleep)
-   (when *create-viewer*
-     (x::window-main-one))
-   ))
+  (let ((angle-vector (ros::get-param "~angle_vector" nil)))
+    (setq angle-vector
+          (if angle-vector
+            (concatenate float-vector angle-vector)
+            nil))
+    (setq *create-viewer* gui)
+    (ros::rate 10)
+    (do-until-key
+     (pub-robot-plane *fetch* angle-vector)
+     (ros::spin-once)
+     (ros::sleep)
+     (when *create-viewer*
+       (x::window-main-one)))
+    ))
 
 ;; (main)

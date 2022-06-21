@@ -24,7 +24,7 @@ class CalcSensorPlacement(object):
         use_base = rospy.get_param('~use_base', True)
         self.d_hover = rospy.get_param('~d_hover', 0.05)
         self.joint_limit_margin = rospy.get_param(
-            '~joint_limit_margin', (15 / 180.0) * (2 * np.pi))
+            '~joint_limit_margin', (5 / 180.0) * np.pi)
         sensor_type = rospy.get_param('~sensor_type', "none")
         self.visualize = rospy.get_param('~visualize', False)
         # Optimization config
@@ -47,16 +47,23 @@ class CalcSensorPlacement(object):
             rospy.logwarn('Wait for /sensor_type topic to come ...')
             msg = rospy.wait_for_message('/sensor_type', String, timeout=None)
             sensor_type = msg.data
+        # Here, self.config_x(self.config_z) is for align_axis_name == 'x(z)'
         if sensor_type in ['ai_camera', 'thermography']:
             optframe_xyz_from_ef = [0.0, 0.0, 1.0]
         else:  # 'microphone' or 'co2_sensor':
             optframe_xyz_from_ef = [0.0, 0.0, 0.0]
-        self.config = SolverConfig.from_config_path(
+        self.config_x = SolverConfig.from_config_path(
             config_path, use_base=use_base,
             optframe_xyz_from_ef=optframe_xyz_from_ef)
-        self.kinsol = KinematicSolver(self.config)
+        self.config_z = SolverConfig.from_config_path(
+            config_path, use_base=use_base,
+            optframe_xyz_from_ef=[-1 * optframe_xyz_from_ef[2],
+                                  optframe_xyz_from_ef[1],
+                                  optframe_xyz_from_ef[0]])
+        self.kinsol_x = KinematicSolver(self.config_x)
+        self.kinsol_z = KinematicSolver(self.config_z)
         # Robot config
-        urdf_path = os.path.expanduser(self.config.urdf_path)
+        urdf_path = os.path.expanduser(self.config_x.urdf_path)
         self.robot = skrobot.model.RobotModel()
         self.robot.load_urdf_file(urdf_path)
         self.robot_orig = skrobot.model.RobotModel()  # to visualize orig pos
@@ -84,16 +91,16 @@ class CalcSensorPlacement(object):
                     current_av[i] = av.data
         robot.angle_vector(current_av)
 
-    def set_angle_vector(self, angle_vector, target_joints):
+    def set_angle_vector(self, kinsol, angle_vector, target_joints):
         """
         Args:
             angle_vector: std_msgs/Float32[]
             target_joints: std_msgs/String[]
         """
         joint_names = map(lambda x: x.data, target_joints)
-        joint_ids = self.kinsol.kin.get_joint_ids(joint_names)
+        joint_ids = self.kinsol_x.kin.get_joint_ids(joint_names)
         angle_vectors = map(lambda x: x.data, angle_vector)
-        self.kinsol.kin.set_joint_angles(joint_ids, angle_vectors)
+        kinsol.kin.set_joint_angles(joint_ids, angle_vectors)
 
     def clamp_angle_vector(self, joint_list, angle_vector, target_joints):
         """
@@ -167,28 +174,43 @@ class CalcSensorPlacement(object):
         target_obj_pos = np.array(
             [target_obj_pos.x, target_obj_pos.y, target_obj_pos.z])
         # Solve optimization
-        q_init = -np.ones(len(self.kinsol.control_joint_ids)) * 0.4
         # Set current PR2 angle vector to solver
-        self.set_angle_vector(req.angle_vector, req.joint_names)
-        sol = self.kinsol.solve_multiple(
-            q_init, polygons, target_obj_pos, normals=normals,
-            movable_polygon=movable_polygon,
-            d_hover=self.d_hover, joint_limit_margin=self.joint_limit_margin)
-        success = sol.success
-        if not success:
+        min_cost = np.inf
+        min_sol = None
+        min_config = None
+        success = False
+        for align_axis_name, config, kinsol in zip(
+                ['x', 'z'],
+                [self.config_x, self.config_z],
+                [self.kinsol_x, self.kinsol_z]):
+            q_init = -np.ones(len(kinsol.control_joint_ids)) * 0.4
+            self.set_angle_vector(kinsol, req.angle_vector, req.joint_names)
+            sol = kinsol.solve_multiple(
+                q_init, polygons, target_obj_pos, normals=normals,
+                movable_polygon=movable_polygon,
+                align_axis_name=align_axis_name,
+                d_hover=self.d_hover,
+                joint_limit_margin=self.joint_limit_margin)
+            success = sol.success
+            if success and sol.fun < min_cost:
+                min_cost = sol.fun
+                min_sol = sol
+                min_config = config
+        if success:
+            rospy.loginfo('Calculation finished successfully')
+        else:
             rospy.logerr('Sensor placement SQP optimization failed.')
-        rospy.loginfo('Calculation finished successfully')
         # Return rosservice response
         joints = [self.robot.__dict__[name]
-                  for name in self.config.control_joint_names]
+                  for name in min_config.control_joint_names]
         set_robot_config(
-            self.robot, joints, sol.x, with_base=self.config.use_base)
+            self.robot, joints, min_sol.x, with_base=min_config.use_base)
         res = SensorPlacementResponse()
         res.joint_names = [String(j.name) for j in joints]
-        if self.config.use_base is True:
-            av = sol.x[:-3]
+        if min_config.use_base is True:
+            av = min_sol.x[:-3]
         else:
-            av = sol.x
+            av = min_sol.x
         # Clamp angle vector between -2*pi and 2*pi
         res.angle_vector = self.clamp_angle_vector(
             self.robot.joint_list, [Float32(i) for i in av], res.joint_names)
@@ -199,7 +221,7 @@ class CalcSensorPlacement(object):
         self.response_pub.publish(res)
         # Visualize in scikit-robot
         if self.visualize:
-            vm = VisManager(self.config)
+            vm = VisManager(min_config)
             vm.add_target(target_obj_pos)
             # Reflect current PR2's angle vector
             self.set_angle_vector_for_skrobot(

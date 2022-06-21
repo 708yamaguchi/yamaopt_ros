@@ -76,19 +76,23 @@
         (return-from robot-link-coords (send l :copy-worldcoords)))))
   (return-from robot-link-coords nil))
 
-(defun robot-attachable-cubes (robot)
+(defun robot-attachable-cubes (robot &optional (angle-vector nil))
   (cond
    ((and (boundp '*fetch*) (eq robot *fetch*))
-    (send *fetch* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t))
+    (if angle-vector
+      (send *fetch* :angle-vector angle-vector)
+      (send *fetch* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t)))
     (fetch-attachable-cubes))
    ((and (boundp '*pr2*) (eq robot *pr2*))
-    (send *pr2* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t))
-    (pr2-attachable-cubes))
-   ))
+    (if angle-vector
+      (send *pr2* :angle-vector angle-vector)
+      (send *pr2* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t)))
+    (pr2-attachable-cubes)))
+  )
 
-(defun polygon-and-coef-msg (robot)
+(defun polygon-and-coef-msg (robot &optional (angle-vector nil))
   (let* ((polygon-array (instance jsk_recognition_msgs::PolygonArray :init))
-         (cubes-and-coefs (robot-attachable-cubes robot))
+         (cubes-and-coefs (robot-attachable-cubes robot angle-vector))
          (cubes (car cubes-and-coefs))
          (polygons (mapcar #'cube->polygon-stamped cubes))
          (coefs (cadr cubes-and-coefs))
@@ -104,8 +108,8 @@
     (list polygon-array coef-array)
     ))
 
-(defun pub-robot-plane (robot)
-  (let* ((polygon-and-coef (polygon-and-coef-msg robot))
+(defun pub-robot-plane (robot &optional (angle-vector nil))
+  (let* ((polygon-and-coef (polygon-and-coef-msg robot angle-vector))
          (polygon-array (car polygon-and-coef))
          (coef-array (cadr polygon-and-coef)))
     (ros::publish *polygon-topic-name* polygon-array)

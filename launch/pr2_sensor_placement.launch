@@ -13,6 +13,9 @@
        doc="If true, planes calculated from vision is used for sensor placement. If you use Kinematics Simulator (not real robot), this arg should be false."/>
   <arg name="use_robot_planes" default="true"
        doc="If true, planes fixed at robot is used for sensor placement."/>
+  <arg name="fix_robot_planes" default="false"
+       doc="If true, robot planes on fixed-robot pose is published. This is only useful when $(arg use_robot_planes) is true.
+            Currently, this arg is used with only Kinematics Simulator."/>
   <arg name="sensor_type" default="none" doc="If given, /sensor_placement node does not wait for /sensor_type topic" />
   <arg name="gui" default="true" />
 
@@ -64,7 +67,11 @@
     </node>
     <!-- Publish plane and coef of PR2 body -->
     <node pkg="yamaopt_ros" type="pub-robot-plane-pr2.l" name="pub_robot_plane_pr2"
-          output="screen" args="&quot;(main nil)&quot;" />
+          output="screen" args="&quot;(main nil)&quot;">
+      <rosparam if="$(arg fix_robot_planes)" subst_value="true">
+        angle_vector: [300.0, 75.0, 50.0, 110.0, -110.0, -20.0, -10.0, -10.0, -75.0, 50.0, -110.0, -110.0, 20.0, -10.0, -10.0, 0.0, 30.0]
+      </rosparam>
+    </node>
   </group>
 
   <!-- Server to calculate sensor placement optimization -->
