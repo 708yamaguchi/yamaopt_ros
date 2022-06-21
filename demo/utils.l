@@ -20,31 +20,35 @@
   (let ((neck-p-y (list (list 40 0) (list -40 0) (list 0 20) (list 0 -20)))
         (polygon-array (instance jsk_recognition_msgs::PolygonArray :init))
         (coef-array (instance jsk_recognition_msgs::ModelCoefficientsArray :init))
-        accum-res-vision accum-res-robot)
+        (use-vision-planes (ros::get-param "~use_vision_planes"))
+        (use-robot-planes (ros::get-param "~use_robot_planes"))
+        (accum-res-vision (instance yamaopt_ros::AccumulatePolygonsResponse :init))
+        (accum-res-robot (instance yamaopt_ros::AccumulatePolygonsResponse :init)))
     ;; Get vision planes
-    (clear-accumulated-polygons "accum_polygons_vision")
-    (dolist (p-y neck-p-y)
-      (send *pr2* :head :neck-p :joint-angle (car p-y))
-      (send *pr2* :head :neck-y :joint-angle (cadr p-y))
+    (when use-vision-planes
+      (clear-accumulated-polygons "accum_polygons_vision")
+      (dolist (p-y neck-p-y)
+        (send *pr2* :head :neck-p :joint-angle (car p-y))
+        (send *pr2* :head :neck-y :joint-angle (cadr p-y))
+        (send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
+        (send *ri* :wait-interpolation)
+        ;; Add both robot body's plane and vision plane
+        (dotimes (i 3)
+          (setq accum-res-vision
+                (ros::service-call "/accum_polygons_vision/accum_polygons"
+                                   (instance yamaopt_ros::AccumulatePolygonsRequest :init)))
+          (unix:usleep (* 300 1000)))))
+    ;; Get robot body planes after looking at target point
+    (when use-robot-planes
+      (send *pr2* :head :neck-p :joint-angle 30)
+      (send *pr2* :head :neck-y :joint-angle 0)
       (send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
       (send *ri* :wait-interpolation)
-      ;; Add both robot body's plane and vision plane
-      (dotimes (i 3)
-        (setq accum-res-vision
-              (ros::service-call "/accum_polygons_vision/accum_polygons"
-                                 (instance yamaopt_ros::AccumulatePolygonsRequest :init)))
-        (unix:usleep (* 300 1000)))
-      )
-    ;; Get robot body planes after looking at target point
-    (send *pr2* :head :neck-p :joint-angle 30)
-    (send *pr2* :head :neck-y :joint-angle 0)
-    (send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
-    (send *ri* :wait-interpolation)
-    (unix:usleep (* 300 1000)) ;; wait for robot body planes are published
-    (clear-accumulated-polygons "accum_polygons_robot")
-    (setq accum-res-body
-          (ros::service-call "/accum_polygons_robot/accum_polygons"
-                             (instance yamaopt_ros::AccumulatePolygonsRequest :init)))
+      (unix:usleep (* 300 1000)) ;; wait for robot body planes are published
+      (clear-accumulated-polygons "accum_polygons_robot")
+      (setq accum-res-body
+            (ros::service-call "/accum_polygons_robot/accum_polygons"
+                               (instance yamaopt_ros::AccumulatePolygonsRequest :init))))
     ;; Append vision plane and robot body plane
     (send polygon-array :polygons
           (append (send accum-res-vision :polygon_array :polygons)

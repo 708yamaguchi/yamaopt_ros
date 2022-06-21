@@ -42,29 +42,28 @@ rosrun yamaopt_ros download_sample_data.py
 
   - Sample
 
-    Sensor placement optimization via rosservice using PR2 rosbag
+    Sensor placement optimization with real PR2 robot based on vision planes robot-fixed planes.
+
+    ```
+    roslaunch yamaopt_ros pr2_sensor_placement.launch use_base:=false
+    ```
+
+    Sensor placement optimization with Kinematics Simulator.
+
+    ```
+    # We need to set use_vision_plances to false because we cannot use vision data with Kinematics Simulator
+    # We need to give sensor_type because /sensor_type topic is not published in this case.
+    roslaunch yamaopt_ros pr2_sensor_placement.launch use_base:=false use_vision_planes:=false sensor_type:=ai_camera
+    ```
+
+    Sensor placement optimization via rosservice using PR2 rosbag (old?)
 
     ```
     roslaunch yamaopt_ros sample_pr2_sensor_placement.launch
     ```
 
-    Sensor placement optimization via rosservice with fixed polygons
+    Sensor placement optimization via rosservice with fixed polygons (old?)
 
     ```
     roslaunch yamaopt_ros sample_fixed_polygon_sensor_placement.launch
-    ```
-
-  - Debug (Remove later)
-
-    accumulating polygons
-
-    ```
-    roslaunch yamaopt_ros debug_accum_polygons.launch robot:=pr2
-    roslaunch yamaopt_ros debug_accum_polygons.launch robot:=fetch
-    ```
-
-    visualizing polygons
-
-    ```
-    rosrun yamaopt_ros debug_visualize_polygons.py
     ```

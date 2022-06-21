@@ -9,53 +9,63 @@
   <arg name="arm" default="right" />
   <arg name="move_robot" default="true"
        doc="If false, robot does not move and does not call /sensor_placement service"/>
+  <arg name="use_vision_planes" default="true"
+       doc="If true, planes calculated from vision is used for sensor placement. If you use Kinematics Simulator (not real robot), this arg should be false."/>
+  <arg name="use_robot_planes" default="true"
+       doc="If true, planes fixed at robot is used for sensor placement."/>
   <arg name="sensor_type" default="none" doc="If given, /sensor_placement node does not wait for /sensor_type topic" />
   <arg name="gui" default="true" />
 
-  <!-- Plane extraction (Launched inside the PR2) -->
-  <node name="organized_multi_plane_segmentation"
-        pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/OrganizedMultiPlaneSegmentation"
-        machine="pr1040">
-    <remap from="~input" to="/kinect_head/depth_registered/points"/>
-    <rosparam>
-      publish_normal: true
-      <!-- Not to speak PR2 -->
-      vital_rate: 0.01
-      always_subscribe: true
-    </rosparam>
-  </node>
+  <group if="$(arg use_vision_planes)">
+    <!-- Plane extraction (Launched inside the PR2) -->
+    <node name="organized_multi_plane_segmentation"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_pcl/OrganizedMultiPlaneSegmentation"
+          machine="pr1040">
+      <remap from="~input" to="/kinect_head/depth_registered/points"/>
+      <rosparam>
+        publish_normal: true
+        <!-- Not to speak PR2 -->
+        vital_rate: 0.01
+        always_subscribe: true
+      </rosparam>
+    </node>
+    <!-- Convert Polygon Array -->
+    <node name="polygon_array_transformer"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_pcl/PolygonArrayTransformer">
+      <remap from="~input_polygons"
+             to="/organized_multi_plane_segmentation/output_polygon"/>
+      <remap from="~input_coefficients"
+             to="/organized_multi_plane_segmentation/output_coefficients"/>
+      <rosparam>
+        frame_id: /base_footprint
+      </rosparam>
+    </node>
+    <!-- Accumulate polygon array -->
+    <!-- Please call /accum_polygons_vision/accum_polygons to accumulate polygons -->
+    <node pkg="yamaopt_ros" type="accum_polygons.py" name="accum_polygons_vision">
+      <remap from="~input" to="/polygon_array_transformer/output_polygons" />
+      <remap from="~input_coefficients" to="/polygon_array_transformer/output_coefficients" />
+      <rosparam>
+        max_polygon_len: 100
+      </rosparam>
+    </node>
+  </group>
 
-  <!-- Convert Polygon Array -->
-  <node name="polygon_array_transformer"
-        pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/PolygonArrayTransformer">
-    <remap from="~input_polygons"
-           to="/organized_multi_plane_segmentation/output_polygon"/>
-    <remap from="~input_coefficients"
-           to="/organized_multi_plane_segmentation/output_coefficients"/>
-    <rosparam>
-      frame_id: /base_footprint
-    </rosparam>
-  </node>
-
-  <!-- Accumulate polygon array -->
-  <!-- Please call /accum_polygons_vision/accum_polygons to accumulate polygons -->
-  <node pkg="yamaopt_ros" type="accum_polygons.py" name="accum_polygons_vision">
-    <remap from="~input" to="/polygon_array_transformer/output_polygons" />
-    <remap from="~input_coefficients" to="/polygon_array_transformer/output_coefficients" />
-    <rosparam>
-      max_polygon_len: 100
-    </rosparam>
-  </node>
-  <!-- Please call /accum_polygons_robot/accum_polygons to accumulate polygons -->
-  <node pkg="yamaopt_ros" type="accum_polygons.py" name="accum_polygons_robot">
-    <remap from="~input" to="/robot_plane/output_polygons" />
-    <remap from="~input_coefficients" to="/robot_plane/output_coefficients" />
-    <rosparam>
-      max_polygon_len: 100
-    </rosparam>
-  </node>
+  <group if="$(arg use_robot_planes)">
+    <!-- Please call /accum_polygons_robot/accum_polygons to accumulate polygons -->
+    <node pkg="yamaopt_ros" type="accum_polygons.py" name="accum_polygons_robot">
+      <remap from="~input" to="/robot_plane/output_polygons" />
+      <remap from="~input_coefficients" to="/robot_plane/output_coefficients" />
+      <rosparam>
+        max_polygon_len: 100
+      </rosparam>
+    </node>
+    <!-- Publish plane and coef of PR2 body -->
+    <node pkg="yamaopt_ros" type="pub-robot-plane-pr2.l" name="pub_robot_plane_pr2"
+          output="screen" args="&quot;(main nil)&quot;" />
+  </group>
 
   <!-- Server to calculate sensor placement optimization -->
   <!-- Please call /sensor_placement to calculate sensor placement -->
@@ -72,10 +82,6 @@
     </rosparam>
   </node>
 
-  <!-- Publish plane and coef of PR2 body -->
-  <node pkg="yamaopt_ros" type="pub-robot-plane-pr2.l" name="pub_robot_plane_pr2"
-        output="screen" args="&quot;(main nil)&quot;" />
-
   <!-- Simplest client to calculate sensor placement optimization (For testing purpose) -->
   <!-- <node pkg="yamaopt_ros" type="sample-sensor-placement-client.l" name="sample_sensor_placement_client" -->
   <!--       output="screen" args="&quot;(main)&quot;" /> -->
@@ -86,6 +92,8 @@
         output="screen" args="&quot;(place-sensor)&quot;" >
     <rosparam subst_value="true">
       arm: $(arg arm)
+      use_vision_planes: $(arg use_vision_planes)
+      use_robot_planes: $(arg use_robot_planes)
     </rosparam>
   </node>
 
