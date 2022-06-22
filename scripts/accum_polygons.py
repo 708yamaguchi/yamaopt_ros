@@ -49,7 +49,10 @@ class AccumPolygons:
             # Create response for rosservice
             res = AccumulatePolygonsResponse()
             now = rospy.Time.now()
-            if self.current_polygons is not None:
+            if self.current_polygons is None:
+                rospy.logerr(
+                    "No polygon has come. Check '~input' topic is published.")
+            else:
                 poly_frame_id = self.current_polygons[
                     'polygon'].header.frame_id
                 coef_frame_id = self.current_polygons[
