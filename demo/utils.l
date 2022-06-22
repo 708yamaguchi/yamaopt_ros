@@ -9,6 +9,7 @@
 (ros::load-ros-manifest "yamaopt_ros")
 (load "package://yamaopt_ros/test/test-sensor-placement-common.l")
 (load "package://yamaopt_ros/scripts/pub-robot-plane-pr2.l")
+(load "package://yamaopt_ros/demo/switch-module-grasp.l")
 
 ;; Init node
 (ros::roseus "sensor_placement_client")
@@ -113,10 +114,6 @@
       (list (send *pr2* :angle-vector) res-axis)
       )))
 
-;; TODO: we need to create function for PR2 to change module grasping axis
-;; e.g. PR2 puts the module on its body, then PR2 grasps the module from the different direction.
-;; (defun change-grasp-direction ())
-
 ;; TODO: we need to add information about handling axis (x or z)
 (defun place-sensor ()
   (let (arm-name target-arm av-ret sensor-placement-res)
@@ -124,14 +121,22 @@
     (setq arm-name (ros::get-param "~arm" "right"))
     (cond ((equal arm-name "right") (setq target-arm :rarm))
           ((equal arm-name "left") (setq target-arm :larm)))
-    ;; Move robot
+    ;; Search sensor placement
     (send *pr2* :reset-manip-pose)
     (send *ri* :angle-vector (send *pr2* :angle-vector) 5000)
     (send *ri* :wait-interpolation)
     (setq sensor-placement-res (search-sensor-placement target-arm))
-    (send *pr2* :angle-vector (car sensor-placement-res))
-    (send *pr2* :angle-vector)
 
+    ;; If needed, switch module grasping
+    (when (equal (cadr sensor-placement-res) "z")
+      (switch-module-grasp))
+
+    ;; Place sensor pre-pose
+    (send *pr2* :angle-vector (car sensor-placement-res))
+    (send *ri* :angle-vector (send *pr2* :angle-vector) 10000)
+    (send *ri* :wait-interpolation)
+
+    ;; Push module to plane
     (let (axis move)
       (cond ((equal (cadr sensor-placement-res) "x")
              (setq axis :x)
@@ -141,10 +146,10 @@
              (setq move #f(0 0 10))))
       ;; Pre-pose before placing module
       ;; Note that we use d_hover (default: 0.05), so pre-pose might not be needed.
-      (send *pr2* target-arm :move-end-pos
-            (scale -5 move) :local :use-torso nil)
-      (send *ri* :angle-vector (send *pr2* :angle-vector) 5000)
-      (send *ri* :wait-interpolation)
+      ;; (send *pr2* target-arm :move-end-pos
+      ;;       (scale -5 move) :local :use-torso nil)
+      ;; (send *ri* :angle-vector (send *pr2* :angle-vector) 5000)
+      ;; (send *ri* :wait-interpolation)
       ;; Push module to plane
       (let (av avs tms)
         (dotimes (i 10)

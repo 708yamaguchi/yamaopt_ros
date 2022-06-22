@@ -67,7 +67,7 @@
     </node>
     <!-- Publish plane and coef of PR2 body -->
     <node pkg="yamaopt_ros" type="pub-robot-plane-pr2.l" name="pub_robot_plane_pr2"
-          output="screen" args="&quot;(main nil)&quot;">
+          output="screen" args="&quot;(main nil)&quot;" clear_params="true">
       <rosparam if="$(arg fix_robot_planes)" subst_value="true">
         angle_vector: [300.0, 75.0, 50.0, 110.0, -110.0, -20.0, -10.0, -10.0, -75.0, 50.0, -110.0, -110.0, 20.0, -10.0, -10.0, 0.0, 30.0]
       </rosparam>
@@ -83,7 +83,7 @@
       arm: $(arg arm)
       use_base: $(arg use_base)
       d_hover: 0.05
-      polygon_shrink: 0.03
+      polygon_shrink: 0.06
       visualize: $(arg gui)
       sensor_type: $(arg sensor_type)
     </rosparam>

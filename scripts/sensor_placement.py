@@ -203,6 +203,7 @@ class CalcSensorPlacement(object):
                 min_axis = align_axis_name
         if success:
             rospy.loginfo('Calculation finished successfully')
+            rospy.loginfo('align axis: {}'.format(min_axis))
         else:
             rospy.logerr('Sensor placement SQP optimization failed.')
         # Return rosservice response
@@ -235,7 +236,7 @@ class CalcSensorPlacement(object):
                 vm.robot, req.angle_vector, req.joint_names)
             # Reflect sensor placement angle vector
             vm.reflect_solver_result(
-                sol, polygons, movable_polygon=movable_polygon,
+                min_sol, polygons, movable_polygon=movable_polygon,
                 normals=normals, show_polygon_axis=True)
             vm.show_while()
         return res

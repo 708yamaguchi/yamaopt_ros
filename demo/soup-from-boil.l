@@ -36,7 +36,7 @@
   ;; *ih-knob-coords*の値を書き換えるので、注意
   (correct-ih-knob-coords)
 
-  ;; センサ貼付け位置を探し、貼る
+  ;; 周囲を見てセンサ配置を探し、貼り付ける
   ;; TODO: angle vectorの中継地点を上手に設定しないと、鍋の取っ手に手が引っかかる
   (place-sensor)
 
@@ -45,7 +45,4 @@
 
   ;; お湯を注ぐ
   (pour-soup)
-
-  ;; 冷ます <- TODO: 必要？
-  ;; (cool-soup)
   )
