@@ -23,6 +23,7 @@ class CalcSensorPlacement(object):
         arm = rospy.get_param('~arm', 'right')
         use_base = rospy.get_param('~use_base', True)
         self.d_hover = rospy.get_param('~d_hover', 0.05)
+        self.polygon_shrink = rospy.get_param('~polygon_shrink', 0.03)
         self.joint_limit_margin = rospy.get_param(
             '~joint_limit_margin', (5 / 180.0) * np.pi)
         sensor_type = rospy.get_param('~sensor_type', "none")
@@ -191,6 +192,7 @@ class CalcSensorPlacement(object):
                 movable_polygon=movable_polygon,
                 align_axis_name=align_axis_name,
                 d_hover=self.d_hover,
+                polygon_shrink=self.polygon_shrink,
                 joint_limit_margin=self.joint_limit_margin)
             success = sol.success
             if success and sol.fun < min_cost:

@@ -83,7 +83,7 @@
       arm: $(arg arm)
       use_base: $(arg use_base)
       d_hover: 0.05
-      polygon_shrink: 0.0
+      polygon_shrink: 0.03
       visualize: $(arg gui)
       sensor_type: $(arg sensor_type)
     </rosparam>
