@@ -28,6 +28,7 @@ class CalcSensorPlacement(object):
             '~joint_limit_margin', (5 / 180.0) * np.pi)
         sensor_type = rospy.get_param('~sensor_type', "none")
         self.visualize = rospy.get_param('~visualize', False)
+        self.pub_service = rospy.get_param('~pub_service', True)
         # Optimization config
         r = rospkg.RosPack()
         if robot_name == 'fetch':
@@ -222,8 +223,9 @@ class CalcSensorPlacement(object):
         res.axis = String(data=min_axis)
         res.success = Bool(data=success)
         # Publish request and response as rostopic for rosbag record
-        self.request_pub.publish(req)
-        self.response_pub.publish(res)
+        if self.pub_service:
+            self.request_pub.publish(req)
+            self.response_pub.publish(res)
         # Visualize in scikit-robot
         if self.visualize:
             vm = VisManager(min_config)

@@ -58,6 +58,21 @@ rosrun yamaopt_ros download_sample_data.py
     roslaunch yamaopt_ros pr2_sensor_placement.launch use_base:=false use_vision_planes:=false fix_robot_planes:=true sensor_type:=ai_camera
     ```
 
+    Record rosbag
+
+    ```
+    roslaunch yamaopt_ros pr2_rosbag_record.launch rosbag:=$HOME/$(date +%Y-%m%d-%H%M%S).bag
+    ```
+
+    Play rosbag with optimization visualization
+
+    ```
+    # We need to give sensor_type if /sensor_type topic is not recorded
+    # For other args (e.g. use_base, arm, ...), we need to specify the same args
+    # as we used when recording rosbag.
+    roslaunch yamaopt_ros pr2_rosbag_play.launch sensor_type:=ai_camera use_base:=false rosbag:=$HOME/test.bag
+    ```
+
     Sensor placement optimization via rosservice using PR2 rosbag (old?)
 
     ```

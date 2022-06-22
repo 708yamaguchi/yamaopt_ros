@@ -14,6 +14,11 @@
   <arg name="DEPTH_CAMERA_INFO" value="/kinect_head/depth_registered/throttled/camera_info" />
   <arg name="DEPTH_IMAGE" value="/kinect_head/depth_registered/throttled/image_rect" />
 
+  <arg name="visualize_optimization" default="true" />
+  <arg name="use_base" default="true" />
+  <arg name="arm" default="right" />
+  <arg name="sensor_type" default="none" doc="If given, /sensor_placement node does not wait for /sensor_type topic" />
+
   <param name="use_sim_time" value="true" />
 
   <include file="$(find pr2_description)/robots/upload_pr2.launch">
@@ -105,5 +110,24 @@
 
   <node pkg="rviz" type="rviz" name="$(anon rviz)" if="$(arg gui)"
         args="-d $(find jsk_pr2_startup)/config/jsk_startup.rviz" />
+
+  <group if="$(arg visualize_optimization)">
+    <!-- Subscribe /sensor_placement/request in rosbag file
+         and then call /sensor_placement service -->
+    <node pkg="yamaopt_ros" type="sub_and_call_sensor_placement.py"
+          name="sub_and_call_sensor_placement" output="screen" />
+    <node pkg="yamaopt_ros" type="sensor_placement.py" name="sensor_placement" output="screen">
+      <rosparam subst_value="true">
+        robot_name: pr2
+        arm: $(arg arm)
+        use_base: $(arg use_base)
+        d_hover: 0.05
+        polygon_shrink: 0.03
+        visualize: true
+        pub_service: false
+        sensor_type: $(arg sensor_type)
+      </rosparam>
+    </node>
+  </group>
 
 </launch>
