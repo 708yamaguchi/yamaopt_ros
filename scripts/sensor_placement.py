@@ -178,6 +178,7 @@ class CalcSensorPlacement(object):
         min_cost = np.inf
         min_sol = None
         min_config = None
+        min_axis = None
         success = False
         for align_axis_name, config, kinsol in zip(
                 ['x', 'z'],
@@ -196,6 +197,7 @@ class CalcSensorPlacement(object):
                 min_cost = sol.fun
                 min_sol = sol
                 min_config = config
+                min_axis = align_axis_name
         if success:
             rospy.loginfo('Calculation finished successfully')
         else:
@@ -215,6 +217,7 @@ class CalcSensorPlacement(object):
         res.angle_vector = self.clamp_angle_vector(
             self.robot.joint_list, [Float32(i) for i in av], res.joint_names)
         res.base_pose = tf_utils.coords_to_geometry_pose(sp.robot.coords())
+        res.axis = String(data=min_axis)
         res.success = Bool(data=success)
         # Publish request and response as rostopic for rosbag record
         self.request_pub.publish(req)

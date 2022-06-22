@@ -75,7 +75,7 @@
           (torso (list (send *pr2* :torso :waist-z :joint-angle)))
           (neck (list (send *pr2* :head :neck-y :joint-angle)
                       (send *pr2* :head :neck-p :joint-angle)))
-          req-angle-vector req-joint-names
+          req-angle-vector req-joint-names res-axis
           res res-angle-vector res-base-pose)
       (send req :polygon_array polygon-array)
       (send req :coefficients coef-array)
@@ -107,10 +107,11 @@
       (setq res (ros::service-call "sensor_placement" req))
       (setq res-angle-vector (calc-res-angle-vector res))
       (send *pr2* target-arm :angle-vector res-angle-vector)
-      (ros::ros-info (format nil "~A angle-vector: ~A" target-arm res-angle-vector))
+      (setq res-axis (send (send res :axis) :data))
+      (ros::ros-info (format nil "axis: ~A target-arm: ~A angle-vector: ~A" res-axis target-arm res-angle-vector))
       (objects (list *pr2*))
       (setq res-base-pose (calc-res-base-pose res))
-      (send *pr2* :angle-vector)
+      (list (send *pr2* :angle-vector) res-axis)
       )))
 
 ;; TODO: we need to create function for PR2 to change module grasping axis
@@ -119,7 +120,7 @@
 
 ;; TODO: we need to add information about handling axis (x or z)
 (defun place-sensor ()
-  (let (arm-name target-arm av-ret)
+  (let (arm-name target-arm av-ret sensor-placement-res)
     ;; Get target arm
     (setq arm-name (ros::get-param "~arm" "right"))
     (cond ((equal arm-name "right") (setq target-arm :rarm))
@@ -128,35 +129,48 @@
     (send *pr2* :reset-manip-pose)
     (send *ri* :angle-vector (send *pr2* :angle-vector) 5000)
     (send *ri* :wait-interpolation)
-    (send *pr2* :angle-vector (search-sensor-placement target-arm))
+    (setq sensor-placement-res (search-sensor-placement target-arm))
+    (send *pr2* :angle-vector (car sensor-placement-res))
     (send *pr2* :angle-vector)
-    (send *pr2* target-arm :move-end-pos #f(-50 0 0) :local :use-torso nil)
-    (send *ri* :angle-vector (send *pr2* :angle-vector) 5000)
-    (send *ri* :wait-interpolation)
-    ;; Push module to plane
-    (let (av avs tms)
-      (dotimes (i 10)
-        (send *pr2* target-arm :move-end-pos #f(10 0 0) :local)
-        (setq av (send *pr2* :angle-vector))
-        (setq avs (append avs (list av)))
-        (setq tms (append tms (list 400))))
-      (send *ri* :angle-vector-sequence avs tms))
-    (cancel-motion-when-touch :arm target-arm :direction :x :threshold -1.5)
-    ;; Push again
-    (let (av avs tms)
-      (dotimes (i 2)
-        (send *pr2* target-arm :move-end-pos #f(10 0 0) :local)
-        (setq av (send *pr2* :angle-vector))
-        (setq avs (append avs (list av)))
-        (setq tms (append tms (list 400))))
-      (send *ri* :angle-vector-sequence avs tms))
-    (send *ri* :wait-interpolation)
-    ;; Release module
-    (setq av-ret (send *ri* :state :potentio-vector))
-    (send *ri* :stop-grasp target-arm :wait t)
-    (send *pr2* target-arm :move-end-pos #f(-100 0 0) :local :use-torso nil)
-    (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
-    (send *ri* :wait-interpolation)
+
+    (let (axis move)
+      (cond ((equal (cadr sensor-placement-res) "x")
+             (setq axis :x)
+             (setq move #f(10 0 0)))
+            ((equal (cadr sensor-placement-res) "z")
+             (setq axis :z)
+             (setq move #f(0 0 10))))
+      ;; Pre-pose before placing module
+      ;; Note that we use d_hover (default: 0.05), so pre-pose might not be needed.
+      (send *pr2* target-arm :move-end-pos
+            (scale -5 move) :local :use-torso nil)
+      (send *ri* :angle-vector (send *pr2* :angle-vector) 5000)
+      (send *ri* :wait-interpolation)
+      ;; Push module to plane
+      (let (av avs tms)
+        (dotimes (i 10)
+          (send *pr2* target-arm :move-end-pos move :local)
+          (setq av (send *pr2* :angle-vector))
+          (setq avs (append avs (list av)))
+          (setq tms (append tms (list 400))))
+        (send *ri* :angle-vector-sequence avs tms))
+      (cancel-motion-when-touch :arm target-arm :direction axis :threshold -1.5)
+      ;; ;; Push again
+      ;; (let (av avs tms)
+      ;;   (dotimes (i 2)
+      ;;     (send *pr2* target-arm :move-end-pos move :local)
+      ;;     (setq av (send *pr2* :angle-vector))
+      ;;     (setq avs (append avs (list av)))
+      ;;     (setq tms (append tms (list 400))))
+      ;;   (send *ri* :angle-vector-sequence avs tms))
+      ;; (send *ri* :wait-interpolation)
+      ;; Release module
+      (setq av-ret (send *ri* :state :potentio-vector))
+      (send *ri* :stop-grasp target-arm :wait t)
+      (send *pr2* target-arm :move-end-pos
+            (scale -5 move) :local :use-torso nil)
+      (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
+      (send *ri* :wait-interpolation))
     ;; Return PR2 angle-vector when touch
     av-ret)
   )

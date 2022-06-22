@@ -20,6 +20,7 @@
               arm-left-1-coef arm-left-2-coef arm-right-1-coef arm-right-2-coef
               torso-back-1-coef torso-back-2-coef base-top-left-coef base-top-right-coef)
     ;; head-tilt
+    ;; TODO: use smaller plane
     (setq head-tilt (make-cube 200 240 5))
     (send head-tilt :transform
           (send (robot-link-coords *pr2* "head_tilt_link") :translate #f(-50 0 170))
