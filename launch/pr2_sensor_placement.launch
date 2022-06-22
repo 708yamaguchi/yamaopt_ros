@@ -89,11 +89,8 @@
     </rosparam>
   </node>
 
-  <!-- Simplest client to calculate sensor placement optimization (For testing purpose) -->
-  <!-- <node pkg="yamaopt_ros" type="sample-sensor-placement-client.l" name="sample_sensor_placement_client" -->
-  <!--       output="screen" args="&quot;(main)&quot;" /> -->
-
   <!-- Client to calculate sensor placement optimization with vision and robot planes -->
+  <!-- This node moves PR2 -->
   <node pkg="yamaopt_ros" type="utils.l"
         name="sample_sensor_placement_client" if="$(arg move_robot)"
         output="screen" args="&quot;(place-sensor)&quot;" >

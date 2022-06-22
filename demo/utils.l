@@ -1,10 +1,9 @@
 #!/usr/bin/env roseus
 
-;; Curry demo. Need the following branch.
+;; Need the following branch.
 ;; https://github.com/708yamaguchi/jsk_demos/tree/kanazawa-bthesis-demo
-(load "package://jsk_2021_10_soup_from_boil/euslisp/motion/arrangement-at-arrange.l")
-(load "package://jsk_2021_10_soup_from_boil/euslisp/motion/ih-at-arrange.l")
-(load "package://jsk_2021_10_soup_from_boil/euslisp/motion/tool-at-arrange.l")
+;; Load (cancel-motion-when-touch)
+(load "package://jsk_2021_10_soup_from_boil/euslisp/util/wrench.l")
 
 ;; yamaopt_ros
 (ros::load-ros-manifest "yamaopt_ros")
