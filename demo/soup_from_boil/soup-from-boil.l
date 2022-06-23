@@ -32,13 +32,19 @@
   ;; IHコンロの前に移動（充電ケーブルは常に抜いた状態）
   (move-real-robot :to :arrange)
 
+  ;; 周囲を見てセンサ配置を探し、貼り付ける
+  ;; 元々のsoup-from-boilのデモでは、*pr2*は2号館座標系に存在するが、
+  ;; (place-sensor)では*pr2*が原点の座標系で記述されているので、一時的に座標系を変えている。
+  ;; TODO: angle vectorの中継地点を上手に設定しないと、鍋の取っ手に手が引っかかる
+  ;; TODO: roslaunch から立ち上げる場合は、~armというrosparamをセットするので、引数は必要ない。
+  (let ((demo-coords (send *pr2* :copy-worldcoords)))
+    (send *pr2* :move-to (make-coords) :world)
+    (place-sensor "left")
+    (send *pr2* :move-to demo-coords :world))
+
   ;; IHコンロの位置を触覚で確認
   ;; *ih-knob-coords*の値を書き換えるので、注意
   (correct-ih-knob-coords)
-
-  ;; 周囲を見てセンサ配置を探し、貼り付ける
-  ;; TODO: angle vectorの中継地点を上手に設定しないと、鍋の取っ手に手が引っかかる
-  (place-sensor)
 
   ;; 沸騰させる
   (boil-soup)
