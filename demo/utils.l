@@ -132,9 +132,14 @@
       (switch-module-grasp))
 
     ;; Place sensor pre-pose
-    (send *pr2* :angle-vector (car sensor-placement-res))
-    (send *ri* :angle-vector (send *pr2* :angle-vector) 10000)
-    (send *ri* :wait-interpolation)
+    (send *pr2* :reset-manip-pose)
+    (let (av1 av2) ;; av1 is intermediate pose
+      (send *pr2* :larm :angle-vector #f(44.0768 -1.45561 80.3999 -114.4 -8.36035 -48.7027 -1.59719))
+      (setq av1 (send *pr2* :angle-vector))
+      (send *pr2* :angle-vector (car sensor-placement-res))
+      (setq av2 (send *pr2* :angle-vector))
+      (send *ri* :angle-vector-sequence (list av1 av2) (list 4000 4000))
+      (send *ri* :wait-interpolation))
 
     ;; Push module to plane
     (let (axis move)
