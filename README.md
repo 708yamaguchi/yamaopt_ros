@@ -38,7 +38,17 @@ source devel/setup.bash
 rosrun yamaopt_ros download_sample_data.py
 ```
 
-2. launch sample
+2. launch
+
+  - Demo
+
+    soup\_from\_boil demo.
+    - Before launching the following file, `(setup)` function in `soup-from-boil.l` must be executed.
+    - If rosbag arg is not given, rosbag is not recorded.
+
+    ```
+    roslaunch yamaopt_ros soup_from_boil.launch rosbag:=$HOME/$(date +%Y-%m%d-%H%M%S).bag
+    ```
 
   - Sample
 
