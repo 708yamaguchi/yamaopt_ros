@@ -20,8 +20,8 @@
   (let ((neck-p-y (list (list 40 0) (list -40 0) (list 0 20) (list 0 -20)))
         (polygon-array (instance jsk_recognition_msgs::PolygonArray :init))
         (coef-array (instance jsk_recognition_msgs::ModelCoefficientsArray :init))
-        (use-vision-planes (ros::get-param "~use_vision_planes"))
-        (use-robot-planes (ros::get-param "~use_robot_planes"))
+        (use-vision-planes (ros::get-param "~use_vision_planes" t))
+        (use-robot-planes (ros::get-param "~use_robot_planes" t))
         (accum-res-vision (instance yamaopt_ros::AccumulatePolygonsResponse :init))
         (accum-res-robot (instance yamaopt_ros::AccumulatePolygonsResponse :init)))
     ;; Get vision planes
@@ -115,10 +115,10 @@
       )))
 
 ;; TODO: we need to add information about handling axis (x or z)
-(defun place-sensor ()
+(defun place-sensor (&optional (arm "right"))
   (let (arm-name target-arm av-ret sensor-placement-res)
     ;; Get target arm
-    (setq arm-name (ros::get-param "~arm" "right"))
+    (setq arm-name (ros::get-param "~arm" arm))
     (cond ((equal arm-name "right") (setq target-arm :rarm))
           ((equal arm-name "left") (setq target-arm :larm)))
     ;; Search sensor placement

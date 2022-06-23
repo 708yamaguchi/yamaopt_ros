@@ -23,6 +23,11 @@
   <!-- Note that (setup) must be executed before launching this file -->
   <node name="soup_from_boil" pkg="yamaopt_ros" type="soup-from-boil.l"
         args="&quot;(main)&quot;">
+    <rosparam>
+      arm: left
+      use_vision_planes: true
+      use_robot_planes: true
+    </rosparam>
   </node>
 
   <!-- Record rosbag -->

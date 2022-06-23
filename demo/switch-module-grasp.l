@@ -5,7 +5,7 @@
 (defun put-pose ()
   (send *pr2* :reset-manip-pose)
   (send *pr2* :larm :angle-vector #f(10.401 -8.26124 74.7656 -91.5736 -278.973 -104.833 6.55036))
-  (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(473 -30 1050) :rpy (float-vector -pi/2 pi/2 pi)))
+  (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(473 -30 1050) :rpy (float-vector -pi/2 pi/2 pi)) :use-torso nil)
   (send *pr2* :rarm :angle-vector #f(-23.9263 43.9289 -58.9061 -109.335 -84.8253 -45.7187 504.2))
   (send *pr2* :rarm :inverse-kinematics (make-coords :pos #f(470 58 990) :rpy (float-vector pi/2 0 0)) :use-torso nil)
   )
