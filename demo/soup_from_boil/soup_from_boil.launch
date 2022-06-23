@@ -1,0 +1,34 @@
+<launch>
+  <arg name="port" default="/dev/rfcomm0" doc="Device file of bluetooth sensor module" />
+  <arg name="rosbag" default="" doc="Path to rosbag file to be saved. If empty, rosbag is not recorded." />
+
+  <!-- Find sensor placement -->
+  <include file="$(find yamaopt_ros)/launch/pr2_sensor_placement.launch">
+    <arg name="arm" value="left" />
+    <arg name="use_base" value="false" />
+    <!-- This demo uses thermography -->
+    <arg name="sensor_type" value="none" />
+    <!-- Main roseus program is launched outside of this launch -->
+    <arg name="move_robot" value="false" />
+  </include>
+
+  <!-- Start m5stack (thermography) -->
+  <include file="$(find m5stack_ros)/launch/m5stack_ros.launch">
+    <arg name="port" value="$(arg port)" />
+    <!-- Bluetooth uses baud 115200 -->
+    <arg name="baud" value="115200" />
+  </include>
+
+  <!-- Main roseus -->
+  <!-- Note that (setup) must be executed before launching this file -->
+  <node name="soup_from_boil" pkg="yamaopt_ros" type="soup-from-boil.l"
+        args="&quot;(main)&quot;">
+  </node>
+
+  <!-- Record rosbag -->
+  <include if="$(eval rosbag != '')"
+           file="$(find yamaopt_ros)/launch/pr2_rosbag_record.launch">
+    <arg name="rosbag" value="$(arg rosbag)" />
+  </include>
+
+</launch>

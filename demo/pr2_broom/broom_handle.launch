@@ -1,0 +1,69 @@
+<!-- Copied from https://github.com/708yamaguchi/wireless_sensing/blob/master/launch/broom_handle.launch -->
+
+<launch>
+  <arg name="INPUT_CLOUD" default="/kinect_head/depth_registered/throttled/points" />
+  <arg name="port" default="/dev/rfcomm1" />
+  <arg name="baud" default="115200" />
+  <arg name="gui" default="false" />
+
+  <group ns="broom_handle">
+    <!-- attention clipper -->
+    <node name="attention_clipper_for_handle"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_pcl/AttentionClipper">
+      <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
+      <rosparam>
+        initial_pos: [0.5, 0.0, 1.15]
+        initial_rot: [0, 0, 0]
+        dimension_x: 0.1
+        dimension_y: 0.1
+        dimension_z: 0.1
+        frame_id: base_footprint
+      </rosparam>
+    </node>
+    <node name="attention_clipper_for_plane"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_pcl/AttentionClipper">
+      <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
+      <rosparam>
+        initial_pos: [0.5, 0.0, 1.15]
+        initial_rot: [0, 0, 0]
+        dimension_x: 0.1
+        dimension_y: 0.1
+        dimension_z: 0.1
+        frame_id: base_footprint
+      </rosparam>
+    </node>
+
+    <node name="extract_indices"
+          pkg="jsk_pcl_ros" type="extract_indices">
+      <remap from="~input" to="$(arg INPUT_CLOUD)" />
+      <remap from="~indices" to="attention_clipper_for_handle/output/point_indices" />
+    </node>
+    <!-- color filter -->
+    <include file="$(find jsk_pcl_ros)/launch/hsi_color_filter.launch">
+      <arg name="DEFAULT_NAMESPACE" value="extract_indices" />
+      <arg name="INPUT" value="output" />
+      <!-- Parameters are for black handle -->
+      <arg name="h_max" default="-20" />
+      <arg name="h_min" default="-128" />
+      <arg name="s_max" default="255" />
+      <arg name="s_min" default="0" />
+      <arg name="i_max" default="100" />
+      <arg name="i_min" default="0" />
+    </include>
+    <rosparam>
+      extract_indices/euclidean_clustering/tolerance: 0.01
+    </rosparam>
+    <!-- RViz -->
+    <node if="$(arg gui)" name="rviz" pkg="rviz" type="rviz"
+          args="-d $(find wireless_sensing)/config/broom_handle.rviz" />
+  </group>
+
+  <include file="$(find m5stack_ros)/launch/yolov2.launch">
+    <arg name="port" value="$(arg port)" />
+    <arg name="baud" value="$(arg baud)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+</launch>
