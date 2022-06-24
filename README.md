@@ -30,70 +30,90 @@ catkin build yamaopt_ros
 source devel/setup.bash
 ```
 
-## Sample
+## Usage
 
-1. Download sample rosbag
+### PR2 Demo
 
-```
-rosrun yamaopt_ros download_sample_data.py
-```
+  soup\_from\_boil demo.
 
-2. launch
+  - Before launching the following file, `(setup)` function in `soup-from-boil.l` must be executed.
+  - If rosbag arg is not given, rosbag is not recorded.
+  - Replace the right finger of PR2 with a finger for grasping the ladle.
+  - Place vinyl on the base of PR2 (for waterproofing)
+  - Do not draw thermography data on the m5stack screen to save battery power.
 
-  - Demo
+  ```
+  roslaunch yamaopt_ros soup_from_boil.launch rosbag:=$HOME/$(date +%Y-%m%d-%H%M%S).bag
+  ```
 
-    soup\_from\_boil demo.
-    - Before launching the following file, `(setup)` function in `soup-from-boil.l` must be executed.
-    - If rosbag arg is not given, rosbag is not recorded.
-    - Replace the right finger of PR2 with a finger for grasping the ladle.
-    - Place vinyl on the base of PR2 (for waterproofing)
-    - Do not draw thermography data on the m5stack screen to save battery power.
+### PR2 Sample
 
-    ```
-    roslaunch yamaopt_ros soup_from_boil.launch rosbag:=$HOME/$(date +%Y-%m%d-%H%M%S).bag
-    ```
+  Sensor placement optimization with real PR2 robot based on vision planes robot-fixed planes.
 
-  - Sample
+  ```
+  roslaunch yamaopt_ros pr2_sensor_placement.launch use_base:=false
+  ```
 
-    Sensor placement optimization with real PR2 robot based on vision planes robot-fixed planes.
+  Sensor placement optimization with Kinematics Simulator.
 
-    ```
-    roslaunch yamaopt_ros pr2_sensor_placement.launch use_base:=false
-    ```
+  ```
+  # 1. Set use_vision_plances to false because we cannot use vision data with Kinematics Simulator
+  # 2. Because pub-robot-plane-pr2.l and utils.l cannot communicate with each other about *ri* information in Kinematics Simulator mode,
+  #    we need to give fixed robot pose to pub-robot-plane-pr2.l according *ri* pose in pr2-place-sensor.l code.
+  # 3. Give sensor_type because /sensor_type topic is not published in this case.
+  roslaunch yamaopt_ros pr2_sensor_placement.launch use_base:=false use_vision_planes:=false fix_robot_planes:=true sensor_type:=ai_camera
+  ```
 
-    Sensor placement optimization with Kinematics Simulator.
+  Record rosbag
 
-    ```
-    # 1. Set use_vision_plances to false because we cannot use vision data with Kinematics Simulator
-    # 2. Because pub-robot-plane-pr2.l and utils.l cannot communicate with each other about *ri* information in Kinematics Simulator mode,
-    #    we need to give fixed robot pose to pub-robot-plane-pr2.l according *ri* pose in utils.l code.
-    # 3. Give sensor_type because /sensor_type topic is not published in this case.
-    roslaunch yamaopt_ros pr2_sensor_placement.launch use_base:=false use_vision_planes:=false fix_robot_planes:=true sensor_type:=ai_camera
-    ```
+  ```
+  roslaunch yamaopt_ros pr2_rosbag_record.launch rosbag:=$HOME/$(date +%Y-%m%d-%H%M%S).bag
+  ```
 
-    Record rosbag
+  Play rosbag with optimization visualization
 
-    ```
-    roslaunch yamaopt_ros pr2_rosbag_record.launch rosbag:=$HOME/$(date +%Y-%m%d-%H%M%S).bag
-    ```
+  ```
+  # We need to give sensor_type if /sensor_type topic is not recorded
+  # For other args (e.g. use_base, arm, ...), we need to specify the same args
+  # as we used when recording rosbag.
+  roslaunch yamaopt_ros pr2_rosbag_play.launch sensor_type:=ai_camera use_base:=false rosbag:=$HOME/test.bag
+  ```
 
-    Play rosbag with optimization visualization
+  Sensor placement optimization via rosservice using PR2 rosbag (old?)
 
-    ```
-    # We need to give sensor_type if /sensor_type topic is not recorded
-    # For other args (e.g. use_base, arm, ...), we need to specify the same args
-    # as we used when recording rosbag.
-    roslaunch yamaopt_ros pr2_rosbag_play.launch sensor_type:=ai_camera use_base:=false rosbag:=$HOME/test.bag
-    ```
+  ```
+  roslaunch yamaopt_ros sample_pr2_sensor_placement.launch
+  ```
 
-    Sensor placement optimization via rosservice using PR2 rosbag (old?)
+  Sensor placement optimization via rosservice with fixed polygons (old?)
 
-    ```
-    roslaunch yamaopt_ros sample_pr2_sensor_placement.launch
-    ```
+  ```
+  roslaunch yamaopt_ros sample_fixed_polygon_sensor_placement.launch
+  ```
 
-    Sensor placement optimization via rosservice with fixed polygons (old?)
+### Fetch Sample
 
-    ```
-    roslaunch yamaopt_ros sample_fixed_polygon_sensor_placement.launch
-    ```
+  Sensor placement optimization with Kinematics Simulator.
+
+  ```
+  # 1. Set use_vision_plances to false because we cannot use vision data with Kinematics Simulator
+  # 2. Because pub-robot-plane-fetch.l and utils.l cannot communicate with each other about *ri* information in Kinematics Simulator mode,
+  #    we need to give fixed robot pose to pub-robot-plane-fetch.l according *ri* pose in fetch-place-sensor.l code.
+  # 3. Give sensor_type because /sensor_type topic is not published in this case.
+  roslaunch yamaopt_ros fetch_sensor_placement.launch use_base:=false use_vision_planes:=false fix_robot_planes:=true sensor_type:=ai_camera
+  ```
+
+  Record rosbag
+
+  ```
+  roslaunch yamaopt_ros fetch_rosbag_record.launch rosbag:=$HOME/$(date +%Y-%m%d-%H%M%S).bag
+  ```
+
+  Play rosbag with optimization visualization
+
+  ```
+  # We need to give sensor_type if /sensor_type topic is not recorded
+  # For other args (e.g. use_base, arm, ...), we need to specify the same args
+  # as we used when recording rosbag.
+  roslaunch yamaopt_ros fetch_rosbag_play.launch sensor_type:=ai_camera use_base:=false rosbag:=$HOME/test.bag
+  ```

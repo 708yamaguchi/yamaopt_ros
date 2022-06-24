@@ -1,0 +1,104 @@
+<!-- This file should be used with real fetch robot. -->
+<!-- Please launch this file in the local PC with rossetmaster fetch1075 -->
+
+<launch>
+  <!-- Nodes which subscribe pointcloud should be launched inside fetch1075 -->
+  <machine name="fetch1075" user="yamaguchi" address="fetch1075.jsk.imi.i.u-tokyo.ac.jp" env-loader="/home/fetch/ros/melodic/devel/env.sh" />
+
+  <arg name="input_point" default="/head_camera/depth_registered/points" />
+  <arg name="use_base" default="true" />
+  <arg name="move_robot" default="true"
+       doc="If false, robot does not move and does not call /sensor_placement service"/>
+  <arg name="use_vision_planes" default="true"
+       doc="If true, planes calculated from vision is used for sensor placement. If you use Kinematics Simulator (not real robot), this arg should be false."/>
+  <arg name="use_robot_planes" default="true"
+       doc="If true, planes fixed at robot is used for sensor placement."/>
+  <arg name="fix_robot_planes" default="false"
+       doc="If true, robot planes on fixed-robot pose is published. This is only useful when $(arg use_robot_planes) is true.
+            Currently, this arg is used with only Kinematics Simulator."/>
+  <arg name="sensor_type" default="none" doc="If given, /sensor_placement node does not wait for /sensor_type topic" />
+  <arg name="gui" default="true" />
+
+  <group if="$(arg use_vision_planes)">
+    <!-- Plane extraction (Launched inside the fetch) -->
+    <node name="organized_multi_plane_segmentation"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_pcl/OrganizedMultiPlaneSegmentation"
+          machine="fetch1075">
+      <remap from="~input" to="$(arg input_point)"/>
+      <rosparam>
+        publish_normal: true
+        <!-- Not to speak fetch -->
+        vital_rate: 0.01
+        always_subscribe: true
+      </rosparam>
+    </node>
+    <!-- Convert Polygon Array -->
+    <node name="polygon_array_transformer"
+          pkg="nodelet" type="nodelet"
+          args="standalone jsk_pcl/PolygonArrayTransformer">
+      <remap from="~input_polygons"
+             to="/organized_multi_plane_segmentation/output_polygon"/>
+      <remap from="~input_coefficients"
+             to="/organized_multi_plane_segmentation/output_coefficients"/>
+      <rosparam>
+        frame_id: /base_footprint
+      </rosparam>
+    </node>
+    <!-- Accumulate polygon array -->
+    <!-- Please call /accum_polygons_vision/accum_polygons to accumulate polygons -->
+    <node pkg="yamaopt_ros" type="accum_polygons.py" name="accum_polygons_vision">
+      <remap from="~input" to="/polygon_array_transformer/output_polygons" />
+      <remap from="~input_coefficients" to="/polygon_array_transformer/output_coefficients" />
+      <rosparam>
+        max_polygon_len: 100
+      </rosparam>
+    </node>
+  </group>
+
+  <group if="$(arg use_robot_planes)">
+    <!-- Please call /accum_polygons_robot/accum_polygons to accumulate polygons -->
+    <node pkg="yamaopt_ros" type="accum_polygons.py" name="accum_polygons_robot">
+      <remap from="~input" to="/robot_plane/output_polygons" />
+      <remap from="~input_coefficients" to="/robot_plane/output_coefficients" />
+      <rosparam>
+        max_polygon_len: 100
+      </rosparam>
+    </node>
+    <!-- Publish plane and coef of fetch body -->
+    <node pkg="yamaopt_ros" type="pub-robot-plane-fetch.l" name="pub_robot_plane_fetch"
+          output="screen" args="&quot;(main nil)&quot;" clear_params="true">
+      <rosparam if="$(arg fix_robot_planes)" subst_value="true">
+        angle_vector: [20.0, 75.6304, 80.2141, -11.4592, 98.5487, 0.0, 95.111, 0.0, 0.0, 0.0]
+      </rosparam>
+    </node>
+  </group>
+
+  <!-- Server to calculate sensor placement optimization -->
+  <!-- Please call /sensor_placement to calculate sensor placement -->
+  <!-- Set gui:=false when demo. The gui window stops the demo. -->
+  <node pkg="yamaopt_ros" type="sensor_placement.py" name="sensor_placement" output="screen">
+    <rosparam subst_value="true">
+      robot_name: fetch
+      arm: right
+      use_base: $(arg use_base)
+      d_hover: 0.01
+      polygon_shrink: 0.03
+      visualize: $(arg gui)
+      sensor_type: $(arg sensor_type)
+    </rosparam>
+  </node>
+
+  <!-- Client to calculate sensor placement optimization with vision and robot planes -->
+  <!-- This node moves PR2 -->
+  <node pkg="yamaopt_ros" type="fetch-place-sensor.l"
+        name="sample_sensor_placement_client" if="$(arg move_robot)"
+        output="screen" args="&quot;(place-sensor)&quot;" >
+    <rosparam subst_value="true">
+      arm: right
+      use_vision_planes: $(arg use_vision_planes)
+      use_robot_planes: $(arg use_robot_planes)
+    </rosparam>
+  </node>
+
+</launch>
