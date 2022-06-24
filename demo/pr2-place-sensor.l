@@ -133,22 +133,47 @@
 
     ;; Place sensor pre-pose
     (send *pr2* :reset-manip-pose)
-    (let (av1 av2) ;; av1 is intermediate pose
+    (let (av1 av2 flip) ;; av1 is intermediate pose
       (send *pr2* :larm :angle-vector #f(44.0768 -1.45561 80.3999 -114.4 -8.36035 -48.7027 -1.59719))
       (setq av1 (send *pr2* :angle-vector))
       (send *pr2* :angle-vector (car sensor-placement-res))
+      ;; If PR2 hand coords is wrong, flip. (yamaopt's bug)
+
+      (let ((wc (send *pr2* :copy-worldcoords))
+            (lwc (send *pr2* :larm :end-coords :copy-worldcoords))
+            z-axis-z)
+        ;; temporary move *pr2* to (make-coords)
+        (send *pr2* :move-to (make-coords) :world)
+        (send lwc :locate #f(0 0 0) :world)
+        (setq z-axis-z (elt (send lwc :transform-vector #f(0 0 1)) 2))
+        (when (< z-axis-z 0)
+          (setq flip t))
+        (send *pr2* :move-to wc :world))
+
+      (setq z-axis (send (send *pr2* :larm :end-coords :copy-worldcoords) :z-axis))
+      (send *pr2* target-arm :move-end-pos #f(-100 0 0) :local :use-torso nil)
+      (when flip
+        (ros::ros-error "flip is t")
+        (send *pr2* target-arm :wrist-r :joint-angle (- (send *pr2* target-arm :wrist-r :joint-angle) 180)))
       (setq av2 (send *pr2* :angle-vector))
-      (send *ri* :angle-vector-sequence (list av1 av2) (list 4000 4000))
+      (send *pr2* :angle-vector (car sensor-placement-res))
+      (when flip
+        (ros::ros-error "flip is t")
+        (send *pr2* target-arm :wrist-r :joint-angle (- (send *pr2* target-arm :wrist-r :joint-angle) 180)))
+      (setq av3 (send *pr2* :angle-vector))
+      (send *ri* :angle-vector-sequence (list av1 av2 av3) (list 4000 3000 1000))
       (send *ri* :wait-interpolation))
 
     ;; Push module to plane
-    (let (axis move)
+    (let (axis move touch-thre)
       (cond ((equal (cadr sensor-placement-res) "x")
              (setq axis :x)
-             (setq move #f(10 0 0)))
+             (setq move #f(10 0 0))
+             (setq touch-thre -1.5))
             ((equal (cadr sensor-placement-res) "z")
              (setq axis :z)
-             (setq move #f(0 0 10))))
+             (setq move #f(0 0 -10))
+             (setq touch-thre 1.5)))
       ;; Pre-pose before placing module
       ;; Note that we use d_hover (default: 0.05), so pre-pose might not be needed.
       ;; (send *pr2* target-arm :move-end-pos
@@ -163,7 +188,7 @@
           (setq avs (append avs (list av)))
           (setq tms (append tms (list 400))))
         (send *ri* :angle-vector-sequence avs tms))
-      (cancel-motion-when-touch :arm target-arm :direction axis :threshold -1.5)
+      (cancel-motion-when-touch :arm target-arm :direction axis :threshold touch-thre)
       ;; ;; Push again
       ;; (let (av avs tms)
       ;;   (dotimes (i 2)
@@ -176,10 +201,21 @@
       ;; Release module
       (setq av-ret (send *ri* :state :potentio-vector))
       (send *ri* :stop-grasp target-arm :wait t)
-      (send *pr2* target-arm :move-end-pos
-            (scale -5 move) :local :use-torso nil)
+      (send *pr2* target-arm :move-end-pos #f(-100 0 0) :local :use-torso nil)
+      ;; (send *pr2* target-arm :move-end-pos
+      ;;       (scale -5 move) :local :use-torso nil)
       (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
       (send *ri* :wait-interpolation))
+
+    ;; Return to reset-manip-pose
+    (let (av1 av2)
+      (send *pr2* :reset-manip-pose)
+      (send *pr2* :larm :move-end-pos #f(-100 50 0) :world :use-torso nil)
+      (setq av1 (send *pr2* :angle-vector))
+      (setq av2 (send *pr2* :reset-manip-pose))
+      (send *ri* :angle-vector-sequence (list av1 av2) (list 4000 1000))
+      (send *ri* :wait-interpolation))
+
     ;; Return PR2 angle-vector when touch
     av-ret)
   )

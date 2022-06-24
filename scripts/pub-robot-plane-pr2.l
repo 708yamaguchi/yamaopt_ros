@@ -21,9 +21,9 @@
               torso-back-1-coef torso-back-2-coef base-top-left-coef base-top-right-coef)
     ;; head-tilt
     ;; TODO: use smaller plane
-    (setq head-tilt (make-cube 200 240 5))
+    (setq head-tilt (make-cube 70 200 5))
     (send head-tilt :transform
-          (send (robot-link-coords *pr2* "head_tilt_link") :translate #f(-50 0 170))
+          (send (robot-link-coords *pr2* "head_tilt_link") :translate #f(-15 0 170))
           :local)
     (send head-tilt :worldcoords)
     (let ((normal (send (elt (send head-tilt :faces) 1) :normal)) ;; 1 is -z axis face
