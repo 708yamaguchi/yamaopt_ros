@@ -43,8 +43,7 @@ source devel/setup.bash
   - Do not draw thermography data on the m5stack screen to save battery power.
   - Make sure that PR2's c2 has bluetooth module and has rfcomm devices for thermography.
     ```
-    ssh pr1040
-    ssh c2
+    ssh pr1040s
     rfcomm bind 0 AA:BB:CC:DD:EE:FF
     rfcomm # list up rfcomm devices
     ```
@@ -56,8 +55,8 @@ source devel/setup.bash
 
   Rosbag record. Please run this inside pr2.
   ```
-  ssh pr1040
-  roslaunch yamaopt_ros pr2_rosbag_record.launch rosbag:=$HOME/$(date +%Y-%m%d-%H%M%S).bag
+  ssh pr1040s
+  roslaunch yamaopt_ros pr2_rosbag_record.launch rosbag:=/removable/bagfiles/$(date +%Y-%m%d-%H%M%S).bag
   ```
 
 ### PR2 Sample

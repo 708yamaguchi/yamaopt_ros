@@ -198,6 +198,18 @@
       ;;     (setq tms (append tms (list 400))))
       ;;   (send *ri* :angle-vector-sequence avs tms))
       ;; (send *ri* :wait-interpolation)
+      ;; guri-guri
+      (let (av-orig av1 av2)
+        (setq av-orig (send *pr2* :angle-vector))
+        (send *pr2* target-arm :wrist-r :joint-angle
+              (+ 7.5 (send *pr2* target-arm :wrist-r :joint-angle)))
+        (setq av1 (send *pr2* :angle-vector))
+        (send *pr2* target-arm :wrist-r :joint-angle
+              (+ -15 (send *pr2* target-arm :wrist-r :joint-angle)))
+        (setq av2 (send *pr2* :angle-vector))
+        (send *ri* :angle-vector-sequence (list av1 av2 av-orig) (list 2000 2000 2000))
+        (send *ri* :wait-interpolation))
+
       ;; Release module
       (setq av-ret (send *ri* :state :potentio-vector))
       (send *ri* :stop-grasp target-arm :wait t)
