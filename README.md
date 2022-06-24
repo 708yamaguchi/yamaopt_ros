@@ -45,6 +45,9 @@ rosrun yamaopt_ros download_sample_data.py
     soup\_from\_boil demo.
     - Before launching the following file, `(setup)` function in `soup-from-boil.l` must be executed.
     - If rosbag arg is not given, rosbag is not recorded.
+    - Replace the right finger of PR2 with a finger for grasping the ladle.
+    - Place vinyl on the base of PR2 (for waterproofing)
+    - Do not draw thermography data on the m5stack screen to save battery power.
 
     ```
     roslaunch yamaopt_ros soup_from_boil.launch rosbag:=$HOME/$(date +%Y-%m%d-%H%M%S).bag

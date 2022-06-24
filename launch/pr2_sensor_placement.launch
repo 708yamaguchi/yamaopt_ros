@@ -5,6 +5,7 @@
   <!-- Nodes which subscribe pointcloud should be launched inside PR1040 -->
   <machine name="pr1040" user="yamaguchi" address="pr1040.jsk.imi.i.u-tokyo.ac.jp" env-loader="/home/applications/ros/indigo/devel/env.sh" />
 
+  <arg name="input_point" default="/kinect_head/depth_registered/points" />
   <arg name="use_base" default="true" />
   <arg name="arm" default="right" />
   <arg name="move_robot" default="true"
@@ -25,7 +26,7 @@
           pkg="nodelet" type="nodelet"
           args="standalone jsk_pcl/OrganizedMultiPlaneSegmentation"
           machine="pr1040">
-      <remap from="~input" to="/kinect_head/depth_registered/points"/>
+      <remap from="~input" to="$(arg input_point)"/>
       <rosparam>
         publish_normal: true
         <!-- Not to speak PR2 -->
@@ -91,7 +92,7 @@
 
   <!-- Client to calculate sensor placement optimization with vision and robot planes -->
   <!-- This node moves PR2 -->
-  <node pkg="yamaopt_ros" type="utils.l"
+  <node pkg="yamaopt_ros" type="pr2-place-sensor.l"
         name="sample_sensor_placement_client" if="$(arg move_robot)"
         output="screen" args="&quot;(place-sensor)&quot;" >
     <rosparam subst_value="true">

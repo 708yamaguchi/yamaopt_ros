@@ -2,7 +2,7 @@
 (load "package://jsk_2021_10_soup_from_boil/euslisp/motion/ih-at-arrange.l")
 (load "package://jsk_2021_10_soup_from_boil/euslisp/motion/tool-at-arrange.l")
 
-(load "package://yamaopt_ros/demo/utils.l")
+(load "package://yamaopt_ros/demo/pr2-place-sensor.l")
 
 ;; 準備：最初に換気扇とIHの電源を入れていく
 (ros::roseus "soup_from_boil" :anonymous t)

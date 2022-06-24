@@ -7,8 +7,8 @@
 
 ;; yamaopt_ros
 (ros::load-ros-manifest "yamaopt_ros")
+(load "package://pr2eus/pr2-interface.l")
 (load "package://yamaopt_ros/test/test-sensor-placement-common.l")
-(load "package://yamaopt_ros/scripts/pub-robot-plane-pr2.l")
 (load "package://yamaopt_ros/demo/switch-module-grasp.l")
 
 ;; Init node
