@@ -41,9 +41,23 @@ source devel/setup.bash
   - Replace the right finger of PR2 with a finger for grasping the ladle.
   - Place vinyl on the base of PR2 (for waterproofing)
   - Do not draw thermography data on the m5stack screen to save battery power.
+  - Make sure that PR2's c2 has bluetooth module and has rfcomm devices for thermography.
+    ```
+    ssh pr1040
+    ssh c2
+    rfcomm bind 0 AA:BB:CC:DD:EE:FF
+    rfcomm # list up rfcomm devices
+    ```
 
+  Main program
   ```
-  roslaunch yamaopt_ros soup_from_boil.launch rosbag:=$HOME/$(date +%Y-%m%d-%H%M%S).bag
+  roslaunch yamaopt_ros soup_from_boil.launch
+  ```
+
+  Rosbag record. Please run this inside pr2.
+  ```
+  ssh pr1040
+  roslaunch yamaopt_ros pr2_rosbag_record.launch rosbag:=$HOME/$(date +%Y-%m%d-%H%M%S).bag
   ```
 
 ### PR2 Sample

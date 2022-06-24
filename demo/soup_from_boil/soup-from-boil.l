@@ -29,8 +29,14 @@
   )
 
 (defun main ()
-  ;; IHコンロの前に移動（充電ケーブルは常に抜いた状態）
-  (move-real-robot :to :arrange)
+  (let ((move-before-demo nil))
+    (when move-before-demo
+      ;; IHコンロの前に移動（充電ケーブルは常に抜いた状態）
+      (move-real-robot :to :arrange)
+
+      ;; IHコンロの位置を触覚で確認
+      ;; *ih-knob-coords*の値を書き換えるので、注意
+      (correct-ih-knob-coords)))
 
   ;; 周囲を見てセンサ配置を探し、貼り付ける
   ;; 元々のsoup-from-boilのデモでは、*pr2*は2号館座標系に存在するが、
@@ -41,10 +47,6 @@
     (send *pr2* :move-to (make-coords) :world)
     (place-sensor "left")
     (send *pr2* :move-to demo-coords :world))
-
-  ;; IHコンロの位置を触覚で確認
-  ;; *ih-knob-coords*の値を書き換えるので、注意
-  (correct-ih-knob-coords)
 
   ;; 沸騰させる
   (boil-soup)

@@ -2,6 +2,10 @@
   <arg name="port" default="/dev/rfcomm0" doc="Device file of bluetooth sensor module" />
   <arg name="rosbag" default="" doc="Path to rosbag file to be saved. If empty, rosbag is not recorded." />
 
+  <!-- rosserial via bluetooth is launched inside pr1040s -->
+  <!-- Make sure that rosserial_python package is built in ws_ws workspace -->
+  <machine name="pr1040s" user="yamaguchi" address="pr1040s.jsk.imi.i.u-tokyo.ac.jp" env-loader="/home/yamaguchi/ws_ws/devel/env.sh" />
+
   <!-- Find sensor placement -->
   <include file="$(find yamaopt_ros)/launch/pr2_sensor_placement.launch">
     <arg name="arm" value="left" />
@@ -13,11 +17,14 @@
   </include>
 
   <!-- Start m5stack (thermography) -->
-  <include file="$(find m5stack_ros)/launch/m5stack_ros.launch">
-    <arg name="port" value="$(arg port)" />
-    <!-- Bluetooth uses baud 115200 -->
-    <arg name="baud" value="115200" />
-  </include>
+  <node pkg="rosserial_python" type="serial_node.py" name="serial_node_thermo"
+        output="screen" machine="pr1040s"
+        respawn="true" respawn_delay="10">
+    <rosparam subst_value="true">
+      port: $(arg port)
+      baud: 115200
+    </rosparam>
+  </node>
 
   <!-- Main roseus -->
   <!-- Note that (setup) must be executed before launching this file -->
