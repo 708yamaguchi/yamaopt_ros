@@ -121,7 +121,7 @@
         robot_name: pr2
         arm: $(arg arm)
         use_base: $(arg use_base)
-        d_hover: 0.05
+        d_hover: 0.01
         polygon_shrink: 0.03
         visualize: true
         pub_service: false

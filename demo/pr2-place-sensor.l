@@ -157,6 +157,7 @@
         (send *pr2* target-arm :wrist-r :joint-angle (- (send *pr2* target-arm :wrist-r :joint-angle) 180)))
       (setq av2 (send *pr2* :angle-vector))
       (send *pr2* :angle-vector (car sensor-placement-res))
+      (send *pr2* target-arm :move-end-pos #f(-20 0 0) :local :use-torso nil) ;;
       (when flip
         (ros::ros-error "flip is t")
         (send *pr2* target-arm :wrist-r :joint-angle (- (send *pr2* target-arm :wrist-r :joint-angle) 180)))
@@ -181,38 +182,48 @@
       ;; (send *ri* :angle-vector (send *pr2* :angle-vector) 5000)
       ;; (send *ri* :wait-interpolation)
       ;; Push module to plane
-      (let (av avs tms)
-        (dotimes (i 10)
-          (send *pr2* target-arm :move-end-pos move :local)
-          (setq av (send *pr2* :angle-vector))
-          (setq avs (append avs (list av)))
-          (setq tms (append tms (list 400))))
-        (send *ri* :angle-vector-sequence avs tms))
-      (cancel-motion-when-touch :arm target-arm :direction axis :threshold touch-thre)
-      ;; ;; Push again
       ;; (let (av avs tms)
-      ;;   (dotimes (i 2)
+      ;;   (dotimes (i 10)
       ;;     (send *pr2* target-arm :move-end-pos move :local)
       ;;     (setq av (send *pr2* :angle-vector))
       ;;     (setq avs (append avs (list av)))
       ;;     (setq tms (append tms (list 400))))
       ;;   (send *ri* :angle-vector-sequence avs tms))
+      ;; (cancel-motion-when-touch :arm target-arm :direction axis :threshold touch-thre)
+
+      (send *pr2* :larm :move-end-rot -2 :y)
+      (send *pr2* :larm :move-end-rot -2 :y)
+
+      ;; ;; Push again
+      (let (av avs tms)
+        (dotimes (i 2)
+          (send *pr2* target-arm :move-end-pos move :local)
+          (setq av (send *pr2* :angle-vector))
+          (setq avs (append avs (list av)))
+          (setq tms (append tms (list 400))))
+        (send *ri* :angle-vector-sequence avs tms))
+      (send *ri* :wait-interpolation)
+      ;; head up
+      ;; (send *pr2* :head :neck-p :joint-angle
+      ;;       (+ -10 (send *pr2* :head :neck-p :joint-angle)))
+      ;; (send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
       ;; (send *ri* :wait-interpolation)
       ;; guri-guri
-      (let (av-orig av1 av2)
-        (setq av-orig (send *pr2* :angle-vector))
-        (send *pr2* target-arm :wrist-r :joint-angle
-              (+ 7.5 (send *pr2* target-arm :wrist-r :joint-angle)))
-        (setq av1 (send *pr2* :angle-vector))
-        (send *pr2* target-arm :wrist-r :joint-angle
-              (+ -15 (send *pr2* target-arm :wrist-r :joint-angle)))
-        (setq av2 (send *pr2* :angle-vector))
-        (send *ri* :angle-vector-sequence (list av1 av2 av-orig) (list 2000 2000 2000))
-        (send *ri* :wait-interpolation))
+      ;; (let (av-orig av1 av2)
+      ;;   (setq av-orig (send *pr2* :angle-vector))
+      ;;   (send *pr2* target-arm :wrist-r :joint-angle
+      ;;         (+ 7.5 (send *pr2* target-arm :wrist-r :joint-angle)))
+      ;;   (setq av1 (send *pr2* :angle-vector))
+      ;;   (send *pr2* target-arm :wrist-r :joint-angle
+      ;;         (+ -15 (send *pr2* target-arm :wrist-r :joint-angle)))
+      ;;   (setq av2 (send *pr2* :angle-vector))
+      ;;   (send *ri* :angle-vector-sequence (list av1 av2 av-orig) (list 2000 2000 2000))
+      ;;   (send *ri* :wait-interpolation))
 
       ;; Release module
       (setq av-ret (send *ri* :state :potentio-vector))
       (send *ri* :stop-grasp target-arm :wait t)
+      (unix:sleep 1)
       (send *pr2* target-arm :move-end-pos #f(-100 0 0) :local :use-torso nil)
       ;; (send *pr2* target-arm :move-end-pos
       ;;       (scale -5 move) :local :use-torso nil)
@@ -222,9 +233,12 @@
     ;; Return to reset-manip-pose
     (let (av1 av2)
       (send *pr2* :reset-manip-pose)
+      (send *pr2* :head :neck-p :joint-angle 30)
       (send *pr2* :larm :move-end-pos #f(-100 50 0) :world :use-torso nil)
       (setq av1 (send *pr2* :angle-vector))
-      (setq av2 (send *pr2* :reset-manip-pose))
+      (send *pr2* :reset-manip-pose)
+      (send *pr2* :head :neck-p :joint-angle 30)
+      (setq av2 (send *pr2* :angle-vector))
       (send *ri* :angle-vector-sequence (list av1 av2) (list 4000 1000))
       (send *ri* :wait-interpolation))
 

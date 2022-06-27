@@ -44,8 +44,10 @@
   ;; TODO: angle vectorの中継地点を上手に設定しないと、鍋の取っ手に手が引っかかる
   ;; TODO: roslaunch から立ち上げる場合は、~armというrosparamをセットするので、引数は必要ない。
   (let ((demo-coords (send *pr2* :copy-worldcoords)))
+    (ros::ros-error (format nil "demo-coords ~A" demo-coords))
     (send *pr2* :move-to (make-coords) :world)
     (place-sensor "left")
+    (ros::ros-error (format nil "demo-coords ~A" demo-coords))
     (send *pr2* :move-to demo-coords :world))
 
   ;; 沸騰させる
@@ -53,4 +55,5 @@
 
   ;; お湯を注ぐ
   (pour-soup)
+  (send *ri* :speak-jp "スープが完成しました" :wait t)
   )
