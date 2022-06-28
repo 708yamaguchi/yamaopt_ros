@@ -1,8 +1,5 @@
 ;; Copied from https://github.com/708yamaguchi/wireless_sensing/blob/master/euslisp/pr2-broom.l
 
-;; TODO: Need to change angle vectors for the new broom
-;; TODO: Add (place-sensor) in (main)
-
 ;; Usage
 ;; roslaunch wireless_sensing xxx.launch (Please launch rosserial and color recognition)
 
@@ -18,14 +15,18 @@
 (setq *attach-module-pre-pose*
       #f(152.654 36.7816 40.2475 66.9702 -101.449 -1665.7 -24.9766 265.422 -27.9717 21.9281 -68.518 -98.7688 211.195 -28.6571 -144.966 -1.59565 37.8384))
 
-;; (setq *pre-grasp-broom-with-both-arm*
-;;       #f(152.689 48.9578 -20.2384 67.2564 -118.902 -1336.61 -11.624 -221.726 -41.7715 53.5699 -104.289 -95.623 113.624 -18.4753 -77.7889 -0.009459 37.1023))
+;; For small broom
+;; TODO: Modify rarm end-coords
+;; (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(474 0 1130) :rpy (float-vector (/ -pi 4) 0 0)) :use-torso nil)
+;; (send *pr2* :rarm :inverse-kinematics (make-coords :pos #f(474 0 750) :rpy (float-vector (/ pi 4) 0 0)) :use-torso nil)
 (setq *grasp-broom-with-both-arm*
-      #f(152.689 32.67 -20.2203 68.2928 -117.196 -1296.52 -46.2547 -257.956 -41.7715 53.5699 -104.289 -95.623 113.624 -18.4753 -77.7889 -0.009459 37.1023))
+      #f(152.689 32.67 -20.2203 68.2928 -117.196 -1296.52 -46.2547 -257.956 -36.4624 35.2632 -100.402 -115.652 153.344 -35.8672 -101.522 -0.009459 37.1023))
 
+;; TODO: change sweep vectors for small broom
 (setq *look-at-broom*
       #f(50.0 60.0 74.0 70.0 -120.0 20.0 -30.0 180.0 -34.0166 46.3037 -60.0949 -99.0876 200.996 -21.3085 -93.6422 -9.70605 47.2676))
 
+;; TODO: change sweep vectors for small broom
 (setq *sweep-vectors*
         (list
          (send *pr2* :angle-vector #f(152.758 58.8947 42.183 52.8039 -90.881 -1283.6 -29.7862 -175.134 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 50.5807 35.904))
@@ -108,7 +109,7 @@
 (defun find-broom-handle-pos ()
   (let (broom-handle-msg broom-handle-box)
     (while (not broom-handle-box)
-      (setq broom-handle-msg (one-shot-subscribe "/broom_handle/extract_indices/boxes"
+      (setq broom-handle-msg (one-shot-subscribe "/broom_handle/extract_indices_for_handle/boxes"
                                                  jsk_recognition_msgs::BoundingBoxArray))
       (setq broom-handle-box (car (send broom-handle-msg :boxes))))
     (let* ((broom-handle-pose-camera (send broom-handle-box :pose))
@@ -124,6 +125,7 @@
 ;; Before this function, PR2 must grasp broom in the right hand and module in the left hand
 (defun attach-module ()
   ;; Reach the module to the broom
+  ;; TODO: use (search-sensor-placement)
   (send *ri* :speak-jp "ホウキの先端にカメラを取り付けます")
   (send *ri* :angle-vector
         (send *pr2* :angle-vector *attach-module-pre-pose*)
@@ -146,11 +148,12 @@
   (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
   (let ((pr2-hand-coords (send (send *pr2* :larm :end-coords) :copy-worldcoords)))
+    (ros::ros-info "Search for broom handle...")
     (send pr2-hand-coords :locate (find-broom-handle-pos) :world)
     ;; Need tuning before each demo because handle recognition is not very stable
     ;; attachment is also not stable
     ;; (send pr2-hand-coords :translate #f(-10 0 -20) :local)
-    (send pr2-hand-coords :translate #f(-20 0 0) :local)
+    ;; (send pr2-hand-coords :translate #f(-20 0 0) :local)
     (format t "~A~%" pr2-hand-coords)
     (send *pr2* :larm :inverse-kinematics pr2-hand-coords :use-torso nil))
   (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)

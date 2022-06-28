@@ -1,0 +1,41 @@
+<!-- Mainly copied from https://github.com/708yamaguchi/jsk_3rdparty/blob/e19fc401a7bbcfd3974f77e46f93ebcd5e32aa7a/m5stack_ros/launch/yolov2.launch -->
+
+<launch>
+  <arg name="port" default="/dev/rfcomm0" />
+  <arg name="unitv_image" default="/unitv_image" />
+  <arg name="gui" default="true" />
+
+  <!-- rosserial via bluetooth is launched inside pr1040s -->
+  <!-- Make sure that rosserial_python package is built in ws_ws workspace -->
+  <machine name="pr1040s" user="yamaguchi" address="pr1040s.jsk.imi.i.u-tokyo.ac.jp" env-loader="/home/yamaguchi/ws_ws/devel/env.sh" />
+
+  <!-- Start m5stack (thermography) -->
+  <node pkg="rosserial_python" type="serial_node.py" name="serial_node_thermo"
+        output="screen" machine="pr1040s"
+        respawn="true" respawn_delay="10">
+    <rosparam subst_value="true">
+      port: $(arg port)
+      baud: 115200
+    </rosparam>
+  </node>
+
+  <node pkg="image_transport" type="republish" name="republish" args="compressed raw">
+    <remap from="in" to="/unitv_image" />
+    <remap from="out" to="/unitv_image" />
+  </node>
+
+  <node name="draw_rects" pkg="jsk_perception" type="draw_rects">
+    <remap from="~input" to="$(arg unitv_image)" />
+    <remap from="~input/rects" to="$(arg unitv_image)/rects" />
+    <remap from="~input/class" to="$(arg unitv_image)/class" />
+    <rosparam>
+      use_classification_result: true
+      label_size: 0.3
+      resolution_factor: 2.0
+    </rosparam>
+  </node>
+
+  <node if="$(arg gui)" name="image_view_unitv" pkg="image_view" type="image_view">
+    <remap from="image" to="draw_rects/output"/>
+  </node>
+</launch>
