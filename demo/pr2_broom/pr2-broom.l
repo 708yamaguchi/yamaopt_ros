@@ -8,19 +8,19 @@
 
 (pr2-init)
 
-(setq *demo-init-pose* #f(152.643 52.9929 30.3742 46.8558 -98.3742 -1365.32 -57.8779 -144.105 -50.7516 11.813 -86.1603 -103.351 60.413 -5.72958 12.3549 4.7767 34.776))
+(setq *demo-init-pose* #f(52.643 52.9929 30.3742 46.8558 -98.3742 -1365.32 -57.8779 -144.105 -50.7516 11.813 -86.1603 -103.351 60.413 -5.72958 12.3549 4.7767 34.776))
 
 ;; (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(600 90 820) :rpy (float-vector (/ -pi 4) 0 pi/2)) :use-torso nil)
 ;; (send *pr2* :rarm :inverse-kinematics (make-coords :pos #f(630 -20 920) :rpy (float-vector (/ pi 4) 0 0)) :use-torso nil)
 (setq *attach-module-pre-pose*
-      #f(152.654 36.7816 40.2475 66.9702 -101.449 -1665.7 -24.9766 265.422 -27.9717 21.9281 -68.518 -98.7688 211.195 -28.6571 -144.966 -1.59565 37.8384))
+      #f(52.654 36.7816 40.2475 66.9702 -101.449 -1665.7 -24.9766 265.422 -27.9717 21.9281 -68.518 -98.7688 211.195 -28.6571 -144.966 -1.59565 37.8384))
 
 ;; For small broom
 ;; TODO: Modify rarm end-coords
 ;; (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(474 0 1130) :rpy (float-vector (/ -pi 4) 0 0)) :use-torso nil)
 ;; (send *pr2* :rarm :inverse-kinematics (make-coords :pos #f(474 0 750) :rpy (float-vector (/ pi 4) 0 0)) :use-torso nil)
 (setq *grasp-broom-with-both-arm*
-      #f(152.689 32.67 -20.2203 68.2928 -117.196 -1296.52 -46.2547 -257.956 -36.4624 35.2632 -100.402 -115.652 153.344 -35.8672 -101.522 -0.009459 37.1023))
+      #f(52.689 32.67 -20.2203 68.2928 -117.196 -1296.52 -46.2547 -257.956 -36.4624 35.2632 -100.402 -115.652 153.344 -35.8672 -101.522 -0.009459 37.1023))
 
 ;; TODO: change sweep vectors for small broom
 (setq *look-at-broom*
@@ -29,13 +29,13 @@
 ;; TODO: change sweep vectors for small broom
 (setq *sweep-vectors*
         (list
-         (send *pr2* :angle-vector #f(152.758 58.8947 42.183 52.8039 -90.881 -1283.6 -29.7862 -175.134 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 50.5807 35.904))
-         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 386 750) :rpy (float-vector 0 0 1.02)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
-         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 548 720) :rpy (float-vector 0 0 1.13)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
-         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 519 590) :rpy (float-vector 0 0 0.90)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
-         (progn (send *pr2* :angle-vector #f(152.758 58.8947 42.183 52.8039 -90.881 -1283.6 -29.7862 -175.134 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 50.5807 35.904))
-                (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 389 680) :rpy (float-vector 0 0 0.716)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords)))
-         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 276 850) :rpy (float-vector 0 0 0.38)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
+         (send *pr2* :angle-vector #f(52.758 58.8947 42.183 52.8039 -90.881 -1283.6 -29.7862 -175.134 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 50.5807 35.904))
+         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 386 550) :rpy (float-vector 0 0 1.02)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
+         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 548 520) :rpy (float-vector 0 0 1.13)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
+         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 519 390) :rpy (float-vector 0 0 0.90)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
+         (progn (send *pr2* :angle-vector #f(52.758 58.8947 42.183 52.8039 -90.881 -1283.6 -29.7862 -175.134 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 50.5807 35.904))
+                (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 389 480) :rpy (float-vector 0 0 0.716)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords)))
+         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 276 650) :rpy (float-vector 0 0 0.38)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
          ))
 (send *pr2* :angle-vector (send *ri* :state :potentio-vector))
 
@@ -181,11 +181,11 @@
   (let ((search-avs
          (list
           (send *pr2* :angle-vector
-                #f(152.7 67.2314 25.9319 72.1467 -90.7628 -1290.98 -22.4216 -219.228 -74.7828 49.0326 -113.815 -109.448 19.9973 -5.72958 -10.0461 4.7647 34.848))
+                #f(52.7 67.2314 25.9319 72.1467 -90.7628 -1290.98 -22.4216 -219.228 -74.7828 49.0326 -113.815 -109.448 19.9973 -5.72958 -10.0461 4.7647 34.848))
           (send *pr2* :angle-vector
-                #f(152.7 62.2985 28.6681 53.0207 -52.6038 -1392.21 -49.093 -108.297 -74.7828 48.7466 -114.927 -109.439 19.9973 -5.72958 -10.0461 28.4767 49.368))
+                #f(52.7 62.2985 28.6681 53.0207 -52.6038 -1392.21 -49.093 -108.297 -74.7828 48.7466 -114.927 -109.439 19.9973 -5.72958 -10.0461 28.4767 49.368))
           (send *pr2* :angle-vector
-                #f(152.7 68.8458 15.0893 69.5882 -82.4521 -1321.89 -16.3279 -202.536 -74.7828 48.7466 -114.927 -109.439 19.9973 -5.72958 -10.0461 4.7707 34.848))
+                #f(52.7 68.8458 15.0893 69.5882 -82.4521 -1321.89 -16.3279 -202.536 -74.7828 48.7466 -114.927 -109.439 19.9973 -5.72958 -10.0461 4.7707 34.848))
                )))
     (dolist (search-av search-avs)
       (send *pr2* :angle-vector search-av)
