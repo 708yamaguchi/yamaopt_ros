@@ -26,7 +26,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: BroomCloud
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -1444,6 +1444,19 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
+    - Alpha: 1
+      Class: jsk_rviz_plugin/PolygonArray
+      Color: 25; 255; 0
+      Enabled: true
+      Name: PolygonArray
+      Topic: /organized_multi_plane_segmentation/output_polygon
+      Unreliable: false
+      Value: true
+      coloring: Auto
+      enable lighting: true
+      normal length: 0.10000000149011612
+      only border: true
+      show normal: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -1489,10 +1502,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.32979631423950195
+      Pitch: 0.3647962212562561
       Target Frame: base_link
       Value: Orbit (rviz)
-      Yaw: 4.897038459777832
+      Yaw: 5.977038383483887
     Saved: ~
 Window Geometry:
   Displays:

@@ -15,22 +15,30 @@
 (ros::roseus "sensor_placement_client")
 (pr2-init)
 
-(defun search-sensor-placement (target-arm)
+(defun search-sensor-placement (&optional (target-arm :rarm) (demo "soup_from_boil") (use-robot-planes-arg t))
   ;; Accum polygon and coef
-  (let ((neck-p-y (list (list 40 0) (list -40 0) (list 0 20) (list 0 -20)))
-        (polygon-array (instance jsk_recognition_msgs::PolygonArray :init))
+  (let ((polygon-array (instance jsk_recognition_msgs::PolygonArray :init))
         (coef-array (instance jsk_recognition_msgs::ModelCoefficientsArray :init))
         (use-vision-planes (ros::get-param "~use_vision_planes" t))
-        (use-robot-planes (ros::get-param "~use_robot_planes" t))
+        (use-robot-planes (ros::get-param "~use_robot_planes" use-robot-planes-arg))
         (accum-res-vision (instance yamaopt_ros::AccumulatePolygonsResponse :init))
-        (accum-res-robot (instance yamaopt_ros::AccumulatePolygonsResponse :init)))
+        (accum-res-robot (instance yamaopt_ros::AccumulatePolygonsResponse :init))
+        neck-p-y opt-target-point)
+    ;; Change params based on the demo
+    (cond
+     ((equal demo "soup_from_boil")
+      (setq neck-p-y (list (list 40 0) (list -40 0) (list 0 20) (list 0 -20)))
+      (setq opt-target-point (list 0.8 0.1 1.1)))
+     ((equal demo "pr2_broom")
+      (setq neck-p-y (list (list 40.2 -7.7453)))
+      (setq opt-target-point (list 1.3 0.5 0.8))))
     ;; Get vision planes
     (when use-vision-planes
       (clear-accumulated-polygons "accum_polygons_vision")
       (dolist (p-y neck-p-y)
         (send *pr2* :head :neck-p :joint-angle (car p-y))
         (send *pr2* :head :neck-y :joint-angle (cadr p-y))
-        (send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
+        (send *ri* :angle-vector (send *pr2* :angle-vector) 1000 :head-controller)
         (send *ri* :wait-interpolation)
         ;; Add both robot body's plane and vision plane
         (dotimes (i 3)
@@ -43,7 +51,7 @@
       (send *pr2* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t))
       (send *pr2* :head :neck-p :joint-angle 30)
       (send *pr2* :head :neck-y :joint-angle 0)
-      (send *ri* :angle-vector (send *pr2* :angle-vector) 1000)
+      (send *ri* :angle-vector (send *pr2* :angle-vector) 1000 :head-controller)
       (send *ri* :wait-interpolation)
       (unix:usleep (* 300 1000)) ;; wait for robot body planes are published
       (clear-accumulated-polygons "accum_polygons_robot")
@@ -69,7 +77,7 @@
                             ;;       (list 1.5 -1.5 0))
                             nil ;; Do not use movable polygon
                             ))
-          (target-point (target-point->msg (list 0.8 0.1 1.1)))
+          (target-point (target-point->msg opt-target-point))
           (arm-left (concatenate cons (send *pr2* :larm :angle-vector)))
           (arm-right (concatenate cons (send *pr2* :rarm :angle-vector)))
           (torso (list (send *pr2* :torso :waist-z :joint-angle)))
@@ -114,15 +122,16 @@
       (list (send *pr2* :angle-vector) res-axis)
       )))
 
-;; TODO: we need to add information about handling axis (x or z)
-(defun place-sensor (&optional (arm "right"))
+;; The default value of pre-pose is :reset-manip-pose
+(defun place-sensor (&optional (arm "right")
+                               (prepose #f(300.0 75.0 50.0 110.0 -110.0 -20.0 -10.0 -10.0 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 0.0 50.0)))
   (let (arm-name target-arm av-ret sensor-placement-res)
     ;; Get target arm
     (setq arm-name (ros::get-param "~arm" arm))
     (cond ((equal arm-name "right") (setq target-arm :rarm))
           ((equal arm-name "left") (setq target-arm :larm)))
     ;; Search sensor placement
-    (send *pr2* :reset-manip-pose)
+    (send *pr2* :angle-vector prepose)
     (send *ri* :angle-vector (send *pr2* :angle-vector) 5000)
     (send *ri* :wait-interpolation)
     (setq sensor-placement-res (search-sensor-placement target-arm))
@@ -132,7 +141,7 @@
       (switch-module-grasp))
 
     ;; Place sensor pre-pose
-    (send *pr2* :reset-manip-pose)
+    (send *pr2* :angle-vector prepose)
     (let (av1 av2 flip) ;; av1 is intermediate pose
       (send *pr2* :larm :angle-vector #f(44.0768 -1.45561 80.3999 -114.4 -8.36035 -48.7027 -1.59719))
       (setq av1 (send *pr2* :angle-vector))
@@ -232,11 +241,11 @@
 
     ;; Return to reset-manip-pose
     (let (av1 av2)
-      (send *pr2* :reset-manip-pose)
+          (send *pr2* :angle-vector prepose)
       (send *pr2* :head :neck-p :joint-angle 30)
       (send *pr2* :larm :move-end-pos #f(-100 50 0) :world :use-torso nil)
       (setq av1 (send *pr2* :angle-vector))
-      (send *pr2* :reset-manip-pose)
+          (send *pr2* :angle-vector prepose)
       (send *pr2* :head :neck-p :joint-angle 30)
       (setq av2 (send *pr2* :angle-vector))
       (send *ri* :angle-vector-sequence (list av1 av2) (list 4000 1000))

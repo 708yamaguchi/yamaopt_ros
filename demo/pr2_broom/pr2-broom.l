@@ -4,6 +4,7 @@
 ;; roslaunch wireless_sensing xxx.launch (Please launch rosserial and color recognition)
 
 (load "package://pr2eus/pr2-interface.l")
+(load "package://yamaopt_ros/demo/pr2-place-sensor.l")
 (ros::load-ros-manifest "jsk_recognition_msgs")
 
 (pr2-init)
@@ -15,16 +16,15 @@
 (setq *attach-module-pre-pose*
       #f(52.654 36.7816 40.2475 66.9702 -101.449 -1665.7 -24.9766 265.422 -27.9717 21.9281 -68.518 -98.7688 211.195 -28.6571 -144.966 -1.59565 37.8384))
 
+(setq *look-at-broom-pose*
+      #f(52.8778 59.8438 28.7232 68.7124 -113.311 -1346.38 -94.1234 -228.505 -27.8964 30.9635 -37.3093 -97.6652 266.923 -45.9292 -165.62 -7.7453 40.2))
+
 ;; For small broom
 ;; TODO: Modify rarm end-coords
 ;; (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(474 0 1130) :rpy (float-vector (/ -pi 4) 0 0)) :use-torso nil)
 ;; (send *pr2* :rarm :inverse-kinematics (make-coords :pos #f(474 0 750) :rpy (float-vector (/ pi 4) 0 0)) :use-torso nil)
 (setq *grasp-broom-with-both-arm*
       #f(52.689 32.67 -20.2203 68.2928 -117.196 -1296.52 -46.2547 -257.956 -36.4624 35.2632 -100.402 -115.652 153.344 -35.8672 -101.522 -0.009459 37.1023))
-
-;; TODO: change sweep vectors for small broom
-(setq *look-at-broom*
-      #f(50.0 60.0 74.0 70.0 -120.0 20.0 -30.0 180.0 -34.0166 46.3037 -60.0949 -99.0876 200.996 -21.3085 -93.6422 -9.70605 47.2676))
 
 ;; TODO: change sweep vectors for small broom
 (setq *sweep-vectors*
@@ -125,22 +125,22 @@
 ;; Before this function, PR2 must grasp broom in the right hand and module in the left hand
 (defun attach-module ()
   ;; Reach the module to the broom
-  ;; TODO: use (search-sensor-placement)
   (send *ri* :speak-jp "ホウキの先端にカメラを取り付けます")
   (send *ri* :angle-vector
-        (send *pr2* :angle-vector *attach-module-pre-pose*)
+        (send *pr2* :angle-vector *look-at-broom-pose*)
         5000)
   (send *ri* :wait-interpolation)
   ;; Attach
-  (send *ri* :angle-vector
-        (send *pr2* :larm :move-end-pos #f(80 0 0) :local :use-torso nil)
-        5000)
-  (send *ri* :wait-interpolation)
-  (send *ri* :stop-grasp :larm :wait t)
-  (send *ri* :angle-vector
-        (send *pr2* :larm :move-end-pos #f(-80 0 0) :local :use-torso nil)
-        5000)
-  (send *ri* :wait-interpolation)
+  ;; TODO: use (search-sensor-placement :larm "pr2_broom" nil)
+  ;; (send *ri* :angle-vector
+  ;;       (send *pr2* :larm :move-end-pos #f(80 0 0) :local :use-torso nil)
+  ;;       5000)
+  ;; (send *ri* :wait-interpolation)
+  ;; (send *ri* :stop-grasp :larm :wait t)
+  ;; (send *ri* :angle-vector
+  ;;       (send *pr2* :larm :move-end-pos #f(-80 0 0) :local :use-torso nil)
+  ;;       5000)
+  ;; (send *ri* :wait-interpolation)
   ;; Grasp broom by the left hand. Find broom handle by black color recognition
   (send *pr2* :angle-vector *grasp-broom-with-both-arm*)
   (send *pr2* :larm :move-end-pos #f(-200 50 0) :local :use-torso nil
