@@ -22,7 +22,7 @@
         (use-vision-planes (ros::get-param "~use_vision_planes" t))
         (use-robot-planes (ros::get-param "~use_robot_planes" use-robot-planes-arg))
         (accum-res-vision (instance yamaopt_ros::AccumulatePolygonsResponse :init))
-        (accum-res-robot (instance yamaopt_ros::AccumulatePolygonsResponse :init))
+        (accum-res-body (instance yamaopt_ros::AccumulatePolygonsResponse :init))
         neck-p-y opt-target-point)
     ;; Change params based on the demo
     (cond
