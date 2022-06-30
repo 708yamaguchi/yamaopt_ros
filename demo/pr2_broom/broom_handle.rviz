@@ -5,7 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Diagnostics1/Power1
-        - /Vision1
       Splitter Ratio: 0.5575540065765381
     Tree Height: 728
   - Class: rviz/Selection
@@ -26,7 +25,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: BroomCloud
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -1162,10 +1161,10 @@ Visualization Manager:
     - Class: rviz/Group
       Displays:
         - Class: jsk_rviz_plugin/OverlayImage
-          Enabled: true
+          Enabled: false
           Name: KinectRGB
           Topic: /kinect_head/rgb/quater/image_rect_color
-          Value: true
+          Value: false
           alpha: 0.800000011920929
           height: 128
           keep aspect ratio: true
@@ -1448,7 +1447,7 @@ Visualization Manager:
       Class: jsk_rviz_plugin/PolygonArray
       Color: 25; 255; 0
       Enabled: true
-      Name: PolygonArray
+      Name: BroomPlanes
       Topic: /organized_multi_plane_segmentation/output_polygon
       Unreliable: false
       Value: true

@@ -3,16 +3,17 @@
 <launch>
   <arg name="INPUT_CLOUD" default="/kinect_head/depth_registered/throttled/points" />
   <arg name="gui" default="true" />
-
-  <machine name="pr1040" user="yamaguchi" address="pr1040.jsk.imi.i.u-tokyo.ac.jp" env-loader="/home/applications/ros/indigo/devel/env.sh" />
+  <arg name="manager" default="manager" />
 
   <!-- Broom recognition -->
   <group ns="broom_handle">
+    <node pkg="nodelet" type="nodelet" name="$(arg manager)"
+          args="manager" output="screen" machine="pr1040s"/>
+
     <!-- attention clipper for broom handle -->
     <node name="attention_clipper_for_handle"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_pcl/AttentionClipper"
-          machine="pr1040">
+          args="load jsk_pcl/AttentionClipper $(arg manager)">
       <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
       <rosparam>
         initial_pos: [0.0, 0.0, 0.38]
@@ -27,7 +28,8 @@
       </rosparam>
     </node>
     <node name="extract_indices_for_handle"
-          pkg="jsk_pcl_ros" type="extract_indices">
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ExtractIndices $(arg manager)">
       <remap from="~input" to="$(arg INPUT_CLOUD)" />
       <remap from="~indices" to="attention_clipper_for_handle/output/point_indices" />
       <rosparam>
@@ -38,6 +40,8 @@
     </node>
     <!-- color filter for broom handle -->
     <include file="$(find jsk_pcl_ros)/launch/hsi_color_filter.launch">
+      <arg name="create_manager" value="false" />
+      <arg name="manager" value="$(arg manager)" />
       <arg name="DEFAULT_NAMESPACE" value="extract_indices_for_handle" />
       <arg name="INPUT" value="output" />
       <!-- Parameters are for black handle -->
@@ -60,8 +64,7 @@
     <!-- attention clipper for broom plane -->
     <node name="attention_clipper_for_plane"
           pkg="nodelet" type="nodelet"
-          args="standalone jsk_pcl/AttentionClipper"
-          machine="pr1040">
+          args="load jsk_pcl/AttentionClipper $(arg manager)">
       <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
       <!-- attention is whole broom -->
       <rosparam>
@@ -77,11 +80,14 @@
       </rosparam>
     </node>
     <node name="extract_indices_for_plane"
-          pkg="jsk_pcl_ros" type="extract_indices"
-          machine="pr1040">
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ExtractIndices $(arg manager)">
       <remap from="~input" to="$(arg INPUT_CLOUD)" />
       <remap from="~indices" to="attention_clipper_for_plane/output/point_indices" />
       <rosparam>
+        <!-- OrganizedMultiPlaneSegmentation in pr2_sensor_placement.launch needs
+             organized pointcloud-->
+        keep_organized: true
         <!-- Not to speak PR2 -->
         vital_rate: 0.01
         always_subscribe: true
