@@ -109,7 +109,7 @@
 (defun find-broom-handle-pos ()
   (let (broom-handle-msg broom-handle-box)
     (while (not broom-handle-box)
-      (setq broom-handle-msg (one-shot-subscribe "/broom_handle/extract_indices_for_handle/boxes"
+      (setq broom-handle-msg (one-shot-subscribe "/broom_handle/HSI_color_filter/boxes"
                                                  jsk_recognition_msgs::BoundingBoxArray))
       (setq broom-handle-box (car (send broom-handle-msg :boxes))))
     (let* ((broom-handle-pose-camera (send broom-handle-box :pose))

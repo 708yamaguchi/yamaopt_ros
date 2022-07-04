@@ -9,7 +9,7 @@
 
   <!-- Find sensor placement -->
   <include file="$(find yamaopt_ros)/launch/pr2_sensor_placement.launch">
-    <arg name="input_point" value="/broom_handle/extract_indices_for_plane/output" />
+    <arg name="input_point" value="/broom_handle/HSI_color_filter/extract_indices_for_plane/output" />
     <arg name="arm" value="left" />
     <arg name="use_base" value="false" />
     <arg name="use_robot_planes" value="false" />
@@ -25,10 +25,12 @@
     organized_multi_plane_segmentation/max_curvature: 0.01
   </rosparam>
 
-  <include file="$(find m5stack_ros)/launch/yolov2_with_pr2.launch">
-    <arg name="port" value="$(arg port)" />
-    <arg name="baud" value="$(arg baud)" />
-    <arg name="gui" value="$(arg gui)" />
-  </include>
+  <!-- The main roseus program -->
+
+  <!-- <include file="$(find m5stack_ros)/launch/yolov2_with_pr2.launch"> -->
+  <!--   <arg name="port" value="$(arg port)" /> -->
+  <!--   <arg name="baud" value="$(arg baud)" /> -->
+  <!--   <arg name="gui" value="$(arg gui)" /> -->
+  <!-- </include> -->
 
 </launch>

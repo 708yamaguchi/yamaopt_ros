@@ -4,46 +4,97 @@
   <arg name="INPUT_CLOUD" default="/kinect_head/depth_registered/throttled/points" />
   <arg name="gui" default="true" />
   <arg name="manager" default="manager" />
+  <!-- Use manager name compatible with hsi_color_filter -->
+  <arg name="hsi_ns" default="HSI_color_filter" />
 
   <!-- Broom recognition -->
   <group ns="broom_handle">
-    <node pkg="nodelet" type="nodelet" name="$(arg manager)"
-          args="manager" output="screen" machine="pr1040s"/>
+    <group ns="$(arg hsi_ns)">
+      <node pkg="nodelet" type="nodelet" name="$(arg manager)"
+            args="manager" output="screen" machine="pr1040s"/>
 
-    <!-- attention clipper for broom handle -->
-    <node name="attention_clipper_for_handle"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/AttentionClipper $(arg manager)">
-      <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
+      <!-- attention clipper for broom handle -->
+      <node name="attention_clipper_for_handle"
+            pkg="nodelet" type="nodelet"
+            args="load jsk_pcl/AttentionClipper $(arg manager)">
+        <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
+        <rosparam>
+          initial_pos: [0.0, 0.0, 0.38]
+          initial_rot: [0, 0, 0]
+          dimension_x: 0.1
+          dimension_y: 0.1
+          dimension_z: 0.1
+          frame_id: r_gripper_tool_frame
+          <!-- Not to speak PR2 -->
+          vital_rate: 0.01
+          always_subscribe: true
+        </rosparam>
+      </node>
+      <node name="extract_indices_for_handle"
+            pkg="nodelet" type="nodelet"
+            args="load jsk_pcl/ExtractIndices $(arg manager)">
+        <remap from="~input" to="$(arg INPUT_CLOUD)" />
+        <remap from="~indices" to="attention_clipper_for_handle/output/point_indices" />
+        <rosparam>
+          <!-- Not to speak PR2 -->
+          vital_rate: 0.01
+          always_subscribe: true
+        </rosparam>
+      </node>
+
       <rosparam>
-        initial_pos: [0.0, 0.0, 0.38]
-        initial_rot: [0, 0, 0]
-        dimension_x: 0.1
-        dimension_y: 0.1
-        dimension_z: 0.1
-        frame_id: r_gripper_tool_frame
+        extract_indices_for_handle/euclidean_clustering/tolerance: 0.01
         <!-- Not to speak PR2 -->
-        vital_rate: 0.01
-        always_subscribe: true
+        extract_indices_for_handle/euclidean_clustering/vital_rate: 0.01
+        extract_indices_for_handle/euclidean_clustering/always_subscribe: true
+        extract_indices_for_handle/cluster_decomposer/vital_rate: 0.01
+        extract_indices_for_handle/cluster_decomposer/always_subscribe: true
       </rosparam>
-    </node>
-    <node name="extract_indices_for_handle"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/ExtractIndices $(arg manager)">
-      <remap from="~input" to="$(arg INPUT_CLOUD)" />
-      <remap from="~indices" to="attention_clipper_for_handle/output/point_indices" />
-      <rosparam>
-        <!-- Not to speak PR2 -->
-        vital_rate: 0.01
-        always_subscribe: true
-      </rosparam>
-    </node>
+
+      <!-- attention clipper for broom plane -->
+      <node name="attention_clipper_for_plane"
+            pkg="nodelet" type="nodelet"
+            args="load jsk_pcl/AttentionClipper $(arg manager)">
+        <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
+        <!-- attention is whole broom -->
+        <rosparam>
+          initial_pos: [0.0, 0.0, 0.1]
+          initial_rot: [0, 0, 0]
+          dimension_x: 0.2
+          dimension_y: 0.05
+          dimension_z: 0.70
+          frame_id: r_gripper_tool_frame
+          <!-- Not to speak PR2 -->
+          vital_rate: 0.01
+          always_subscribe: true
+        </rosparam>
+      </node>
+      <node name="extract_indices_for_plane"
+            pkg="nodelet" type="nodelet"
+            args="load jsk_pcl/ExtractIndices $(arg manager)">
+        <remap from="~input" to="$(arg INPUT_CLOUD)" />
+        <remap from="~indices" to="attention_clipper_for_plane/output/point_indices" />
+        <rosparam>
+          <!-- OrganizedMultiPlaneSegmentation in pr2_sensor_placement.launch needs
+               organized pointcloud-->
+          keep_organized: true
+          <!-- Not to speak PR2 -->
+          vital_rate: 0.01
+          always_subscribe: true
+        </rosparam>
+      </node>
+
+      <!-- RViz -->
+      <node if="$(arg gui)" name="rviz" pkg="rviz" type="rviz"
+            args="-d $(find yamaopt_ros)/demo/pr2_broom/broom_handle.rviz" />
+    </group>
+
     <!-- color filter for broom handle -->
     <include file="$(find jsk_pcl_ros)/launch/hsi_color_filter.launch">
       <arg name="create_manager" value="false" />
       <arg name="manager" value="$(arg manager)" />
-      <arg name="DEFAULT_NAMESPACE" value="extract_indices_for_handle" />
-      <arg name="INPUT" value="output" />
+      <arg name="DEFAULT_NAMESPACE" value="$(arg hsi_ns)" />
+      <arg name="INPUT" value="extract_indices_for_handle/output" />
       <!-- Parameters are for black handle -->
       <arg name="h_max" default="-20" />
       <arg name="h_min" default="-128" />
@@ -52,50 +103,5 @@
       <arg name="i_max" default="100" />
       <arg name="i_min" default="0" />
     </include>
-    <rosparam>
-      extract_indices_for_handle/euclidean_clustering/tolerance: 0.01
-      <!-- Not to speak PR2 -->
-      extract_indices_for_handle/euclidean_clustering/vital_rate: 0.01
-      extract_indices_for_handle/euclidean_clustering/always_subscribe: true
-      extract_indices_for_handle/cluster_decomposer/vital_rate: 0.01
-      extract_indices_for_handle/cluster_decomposer/always_subscribe: true
-    </rosparam>
-
-    <!-- attention clipper for broom plane -->
-    <node name="attention_clipper_for_plane"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/AttentionClipper $(arg manager)">
-      <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
-      <!-- attention is whole broom -->
-      <rosparam>
-        initial_pos: [0.0, 0.0, 0.1]
-        initial_rot: [0, 0, 0]
-        dimension_x: 0.2
-        dimension_y: 0.05
-        dimension_z: 0.70
-        frame_id: r_gripper_tool_frame
-        <!-- Not to speak PR2 -->
-        vital_rate: 0.01
-        always_subscribe: true
-      </rosparam>
-    </node>
-    <node name="extract_indices_for_plane"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/ExtractIndices $(arg manager)">
-      <remap from="~input" to="$(arg INPUT_CLOUD)" />
-      <remap from="~indices" to="attention_clipper_for_plane/output/point_indices" />
-      <rosparam>
-        <!-- OrganizedMultiPlaneSegmentation in pr2_sensor_placement.launch needs
-             organized pointcloud-->
-        keep_organized: true
-        <!-- Not to speak PR2 -->
-        vital_rate: 0.01
-        always_subscribe: true
-      </rosparam>
-    </node>
-
-    <!-- RViz -->
-    <node if="$(arg gui)" name="rviz" pkg="rviz" type="rviz"
-          args="-d $(find yamaopt_ros)/demo/pr2_broom/broom_handle.rviz" />
   </group>
 </launch>
