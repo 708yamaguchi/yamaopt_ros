@@ -17,18 +17,15 @@
       #f(52.654 36.7816 40.2475 66.9702 -101.449 -225.7 -24.9766 265.422 -27.9717 21.9281 -68.518 -98.7688 211.195 -28.6571 -144.966 -1.59565 37.8384))
 
 (setq *look-at-broom-pose*
-;;       #f(52.8778 59.8438 28.7232 68.7124 -113.311 93.62 -94.1234 -228.505 -27.8964 30.9635 -37.3093 -97.6652 266.923 -45.9292 -165.62 -7.7453 40.2))
       #f(52.8778 59.8438 28.7232 68.7124 -113.311 93.62 -94.1234 -228.505 -26.7458 32.3683 -36.2564 -80.3959 282.072 -47.7815 -189.989 -7.7453 40.2))
 
 ;; For small broom
-;; TODO: Modify rarm end-coords
-;; (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(474 0 1130) :rpy (float-vector (/ -pi 4) 0 0)) :use-torso nil)
-;; (send *pr2* :rarm :inverse-kinematics (make-coords :pos #f(474 0 750) :rpy (float-vector (/ pi 4) 0 0)) :use-torso nil)
+;; (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(574 0 1030) :rpy (float-vector (/ -pi 4) 0 0)) :use-torso nil)
+;; (send *pr2* :rarm :inverse-kinematics (make-coords :pos #f(574 0 650) :rpy (float-vector (/ pi 4) 0 0)) :use-torso nil)
 (setq *grasp-broom-with-both-arm*
-      #f(52.689 32.67 -20.2203 68.2928 -117.196 143.48 -46.2547 -257.956 -36.4624 35.2632 -100.402 -115.652 153.344 -35.8672 -101.522 -0.009459 37.1023))
+      #f(52.689 29.8974 -16.0101 72.1718 -100.74 138.623 -33.4143 -244.423 -32.1825 30.8072 -93.3597 -99.6036 153.963 -22.8667 -95.2873 -0.009459 37.1023))
 
-;; TODO: change sweep vectors for small broom
-(setq *sweep-vectors*
+(setq *sweep-vectors-for-long-broom*
         (list
          (send *pr2* :angle-vector #f(52.758 58.8947 42.183 52.8039 -90.881 156.4 -29.7862 -175.134 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 50.5807 35.904))
          (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 386 550) :rpy (float-vector 0 0 1.02)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
@@ -37,6 +34,19 @@
          (progn (send *pr2* :angle-vector #f(52.758 58.8947 42.183 52.8039 -90.881 -1283.6 -29.7862 -175.134 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 50.5807 35.904))
                 (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 389 480) :rpy (float-vector 0 0 0.716)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords)))
          (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 276 650) :rpy (float-vector 0 0 0.38)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
+         ))
+;; sweep vectors for short broom
+(setq *sweep-vectors*
+        (list
+         (progn (send *pr2* :angle-vector #f(52.758 58.8947 42.183 52.8039 -90.881 156.4 -29.7862 -175.134 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 50.5807 35.904))
+                (send *pr2* :larm :move-end-pos #f(50 0 0) :local :use-torso nil))
+         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 386 550) :rpy (float-vector 0 0 1.02)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
+         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 548 520) :rpy (float-vector 0 0 1.13)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
+         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 519 390) :rpy (float-vector 0 0 1.1)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
+         (send *pr2* :larm :move-end-pos #f(0 -200 -50) :world :use-torso nil)
+         ;; この間でPR2が左腕をヒネるので、モジュールを落としてしまう可能性あり。良い中間姿勢を探す必要あり（？）
+         (progn (send *pr2* :angle-vector #f(52.758 58.8947 42.183 52.8039 -90.881 156.4 -29.7862 -175.134 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 50.5807 35.904))
+                (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(700 276 650) :rpy (float-vector 0 0 0.38)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords)))
          ))
 (send *pr2* :angle-vector (send *ri* :state :potentio-vector))
 
@@ -137,8 +147,7 @@
 
   ;; Grasp broom by the left hand. Find broom handle by black color recognition
   (send *pr2* :angle-vector *grasp-broom-with-both-arm*)
-  (send *pr2* :larm :move-end-pos #f(-200 50 0) :local :use-torso nil
-        :rotation-axis :z)
+  (send *pr2* :larm :move-end-pos #f(-200 50 0) :local :use-torso nil)
   (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
   (let ((pr2-hand-coords (send (send *pr2* :larm :end-coords) :copy-worldcoords)))
