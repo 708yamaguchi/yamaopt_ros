@@ -124,7 +124,8 @@
 
 ;; The default value of pre-pose is :reset-manip-pose
 (defun place-sensor (&optional (arm "right")
-                               (prepose #f(300.0 75.0 50.0 110.0 -110.0 -20.0 -10.0 -10.0 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 0.0 50.0)))
+                               (prepose #f(300.0 75.0 50.0 110.0 -110.0 -20.0 -10.0 -10.0 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 0.0 50.0))
+                               (demo "soup_from_boil"))
   (let (arm-name target-arm av-ret sensor-placement-res)
     ;; Get target arm
     (setq arm-name (ros::get-param "~arm" arm))
@@ -134,7 +135,10 @@
     (send *pr2* :angle-vector prepose)
     (send *ri* :angle-vector (send *pr2* :angle-vector) 5000)
     (send *ri* :wait-interpolation)
-    (setq sensor-placement-res (search-sensor-placement target-arm))
+    (let (use-robot-plane)
+      (cond ((equal demo "soup_from_boil") (setq use-robot-plane t))
+            ((equal demo "pr2_broom") (setq use-robot-plane nil)))
+      (setq sensor-placement-res (search-sensor-placement target-arm demo use-robot-plane)))
 
     ;; If needed, switch module grasping
     (when (equal (cadr sensor-placement-res) "z")
@@ -171,7 +175,7 @@
         (ros::ros-error "flip is t")
         (send *pr2* target-arm :wrist-r :joint-angle (- (send *pr2* target-arm :wrist-r :joint-angle) 180)))
       (setq av3 (send *pr2* :angle-vector))
-      (send *ri* :angle-vector-sequence (list av1 av2 av3) (list 4000 3000 1000))
+      (send *ri* :angle-vector-sequence (list av1 av2 av3) (list 4000 2000 2000))
       (send *ri* :wait-interpolation))
 
     ;; Push module to plane
@@ -239,17 +243,24 @@
       (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
       (send *ri* :wait-interpolation))
 
-    ;; Return to reset-manip-pose
-    (let (av1 av2)
-          (send *pr2* :angle-vector prepose)
-      (send *pr2* :head :neck-p :joint-angle 30)
-      (send *pr2* :larm :move-end-pos #f(-100 50 0) :world :use-torso nil)
-      (setq av1 (send *pr2* :angle-vector))
-          (send *pr2* :angle-vector prepose)
-      (send *pr2* :head :neck-p :joint-angle 30)
-      (setq av2 (send *pr2* :angle-vector))
-      (send *ri* :angle-vector-sequence (list av1 av2) (list 4000 1000))
-      (send *ri* :wait-interpolation))
+    ;; Return to prepose
+    (cond
+     ;; Move to reset-manip-pose with avoiding collision with kitchen
+     ((equal demo "soup_from_boil")
+      (let (av1 av2)
+        (send *pr2* :angle-vector prepose)
+        (send *pr2* :head :neck-p :joint-angle 30)
+        (send *pr2* :larm :move-end-pos #f(-100 50 0) :world :use-torso nil)
+        (setq av1 (send *pr2* :angle-vector))
+        (send *pr2* :angle-vector prepose)
+        (send *pr2* :head :neck-p :joint-angle 30)
+        (setq av2 (send *pr2* :angle-vector))
+        (send *ri* :angle-vector-sequence (list av1 av2) (list 4000 1000))
+        (send *ri* :wait-interpolation)))
+     ((equal demo "pr2_broom")
+      (send *pr2* :angle-vector prepose)
+      (send *ri* :angle-vector (send *pr2* :angle-vector) 4000)
+      (send *ri* :wait-interpolation)))
 
     ;; Return PR2 angle-vector when touch
     av-ret)
