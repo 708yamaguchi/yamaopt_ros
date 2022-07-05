@@ -31,7 +31,7 @@
       (setq opt-target-point (list 0.8 0.1 1.1)))
      ((equal demo "pr2_broom")
       (setq neck-p-y (list (list 40.2 -7.7453)))
-      (setq opt-target-point (list 1.3 0.5 0.8))))
+      (setq opt-target-point (list 1.3 0.5 0.9))))
     ;; Get vision planes
     (when use-vision-planes
       (clear-accumulated-polygons "accum_polygons_vision")

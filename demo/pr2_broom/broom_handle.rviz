@@ -1350,7 +1350,7 @@ Visualization Manager:
     - Class: jsk_rviz_plugin/BoundingBoxArray
       Enabled: true
       Name: BroomRegion
-      Topic: /broom_handle/HSI_color_filter/attention_clipper_for_plane/output/box_array
+      Topic: /broom_handle/HSI_color_filter_for_plane/attention_clipper/output/box_array
       Unreliable: false
       Value: true
       alpha: 0.800000011920929
@@ -1384,7 +1384,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Flat Squares
-      Topic: /broom_handle/HSI_color_filter/extract_indices_for_plane/output
+      Topic: /broom_handle/HSI_color_filter_for_plane/hsi_output
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -1392,7 +1392,7 @@ Visualization Manager:
     - Class: jsk_rviz_plugin/BoundingBoxArray
       Enabled: true
       Name: BroomHandleRegion
-      Topic: /broom_handle/HSI_color_filter/attention_clipper_for_handle/output/box_array
+      Topic: /broom_handle/HSI_color_filter_for_handle/attention_clipper/output/box_array
       Unreliable: false
       Value: true
       alpha: 0.800000011920929
@@ -1404,7 +1404,7 @@ Visualization Manager:
     - Class: jsk_rviz_plugin/BoundingBoxArray
       Enabled: true
       Name: BroomHandle
-      Topic: /broom_handle/HSI_color_filter/boxes
+      Topic: /broom_handle/HSI_color_filter_for_handle/boxes
       Unreliable: false
       Value: true
       alpha: 0.800000011920929
@@ -1438,7 +1438,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Points
-      Topic: /broom_handle/HSI_color_filter/hsi_output
+      Topic: /broom_handle/HSI_color_filter_for_handle/hsi_output
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -1486,25 +1486,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.220886707305908
+      Distance: 2.542923927307129
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.18373063206672668
-        Y: -0.15084590017795563
-        Z: 0.760786235332489
+        X: 0.14396768808364868
+        Y: 0.25166743993759155
+        Z: 0.736345112323761
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.49479594826698303
+      Pitch: 0.649795413017273
       Target Frame: base_link
       Value: Orbit (rviz)
-      Yaw: 4.617037296295166
+      Yaw: 1.0052088499069214
     Saved: ~
 Window Geometry:
   Displays:

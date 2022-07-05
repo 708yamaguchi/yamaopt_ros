@@ -9,7 +9,8 @@
 
   <!-- Find sensor placement -->
   <include file="$(find yamaopt_ros)/launch/pr2_sensor_placement.launch">
-    <arg name="input_point" value="/broom_handle/HSI_color_filter/extract_indices_for_plane/output" />
+    <!-- <arg name="input_point" value="/broom_handle/HSI_color_filter/extract_indices_for_plane/output" /> -->
+    <arg name="input_point" value="/broom_handle/HSI_color_filter/hsi_output" />
     <arg name="arm" value="left" />
     <arg name="use_base" value="false" />
     <arg name="use_robot_planes" value="false" />

@@ -3,20 +3,22 @@
 <launch>
   <arg name="INPUT_CLOUD" default="/kinect_head/depth_registered/throttled/points" />
   <arg name="gui" default="true" />
-  <arg name="manager" default="manager" />
+  <arg name="handle_manager" default="handle_manager" />
+  <arg name="plane_manager" default="plane_manager" />
   <!-- Use manager name compatible with hsi_color_filter -->
-  <arg name="hsi_ns" default="HSI_color_filter" />
+  <arg name="handle_ns" default="HSI_color_filter_for_handle" />
+  <arg name="plane_ns" default="HSI_color_filter_for_plane" />
 
   <!-- Broom recognition -->
   <group ns="broom_handle">
-    <group ns="$(arg hsi_ns)">
-      <node pkg="nodelet" type="nodelet" name="$(arg manager)"
+    <group ns="$(arg handle_ns)">
+      <node pkg="nodelet" type="nodelet" name="$(arg handle_manager)"
             args="manager" output="screen" machine="pr1040s"/>
 
       <!-- attention clipper for broom handle -->
-      <node name="attention_clipper_for_handle"
+      <node name="attention_clipper"
             pkg="nodelet" type="nodelet"
-            args="load jsk_pcl/AttentionClipper $(arg manager)">
+            args="load jsk_pcl/AttentionClipper $(arg handle_manager)">
         <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
         <rosparam>
           initial_pos: [0.0, 0.0, 0.38]
@@ -30,11 +32,11 @@
           always_subscribe: true
         </rosparam>
       </node>
-      <node name="extract_indices_for_handle"
+      <node name="extract_indices"
             pkg="nodelet" type="nodelet"
-            args="load jsk_pcl/ExtractIndices $(arg manager)">
+            args="load jsk_pcl/ExtractIndices $(arg handle_manager)">
         <remap from="~input" to="$(arg INPUT_CLOUD)" />
-        <remap from="~indices" to="attention_clipper_for_handle/output/point_indices" />
+        <remap from="~indices" to="attention_clipper/output/point_indices" />
         <rosparam>
           <!-- Not to speak PR2 -->
           vital_rate: 0.01
@@ -43,18 +45,38 @@
       </node>
 
       <rosparam>
-        extract_indices_for_handle/euclidean_clustering/tolerance: 0.01
+        extract_indices/euclidean_clustering/tolerance: 0.01
         <!-- Not to speak PR2 -->
-        extract_indices_for_handle/euclidean_clustering/vital_rate: 0.01
-        extract_indices_for_handle/euclidean_clustering/always_subscribe: true
-        extract_indices_for_handle/cluster_decomposer/vital_rate: 0.01
-        extract_indices_for_handle/cluster_decomposer/always_subscribe: true
+        extract_indices/euclidean_clustering/vital_rate: 0.01
+        extract_indices/euclidean_clustering/always_subscribe: true
+        extract_indices/cluster_decomposer/vital_rate: 0.01
+        extract_indices/cluster_decomposer/always_subscribe: true
       </rosparam>
+    </group>
+
+    <!-- color filter for broom handle -->
+    <include file="$(find jsk_pcl_ros)/launch/hsi_color_filter.launch">
+      <arg name="create_manager" value="false" />
+      <arg name="manager" value="$(arg handle_manager)" />
+      <arg name="DEFAULT_NAMESPACE" value="$(arg handle_ns)" />
+      <arg name="INPUT" value="extract_indices/output" />
+      <!-- Parameters are for black handle -->
+      <arg name="h_max" default="-20" />
+      <arg name="h_min" default="-128" />
+      <arg name="s_max" default="255" />
+      <arg name="s_min" default="0" />
+      <arg name="i_max" default="100" />
+      <arg name="i_min" default="0" />
+    </include>
+
+    <group ns="$(arg plane_ns)">
+      <node pkg="nodelet" type="nodelet" name="$(arg plane_manager)"
+            args="manager" output="screen" machine="pr1040s"/>
 
       <!-- attention clipper for broom plane -->
-      <node name="attention_clipper_for_plane"
+      <node name="attention_clipper"
             pkg="nodelet" type="nodelet"
-            args="load jsk_pcl/AttentionClipper $(arg manager)">
+            args="load jsk_pcl/AttentionClipper $(arg plane_manager)">
         <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
         <!-- attention is whole broom -->
         <rosparam>
@@ -69,11 +91,11 @@
           always_subscribe: true
         </rosparam>
       </node>
-      <node name="extract_indices_for_plane"
+      <node name="extract_indices"
             pkg="nodelet" type="nodelet"
-            args="load jsk_pcl/ExtractIndices $(arg manager)">
+            args="load jsk_pcl/ExtractIndices $(arg plane_manager)">
         <remap from="~input" to="$(arg INPUT_CLOUD)" />
-        <remap from="~indices" to="attention_clipper_for_plane/output/point_indices" />
+        <remap from="~indices" to="attention_clipper/output/point_indices" />
         <rosparam>
           <!-- OrganizedMultiPlaneSegmentation in pr2_sensor_placement.launch needs
                organized pointcloud-->
@@ -83,25 +105,26 @@
           always_subscribe: true
         </rosparam>
       </node>
-
-      <!-- RViz -->
-      <node if="$(arg gui)" name="rviz" pkg="rviz" type="rviz"
-            args="-d $(find yamaopt_ros)/demo/pr2_broom/broom_handle.rviz" />
     </group>
 
-    <!-- color filter for broom handle -->
+    <!-- color filter for broom plane -->
     <include file="$(find jsk_pcl_ros)/launch/hsi_color_filter.launch">
       <arg name="create_manager" value="false" />
-      <arg name="manager" value="$(arg manager)" />
-      <arg name="DEFAULT_NAMESPACE" value="$(arg hsi_ns)" />
-      <arg name="INPUT" value="extract_indices_for_handle/output" />
-      <!-- Parameters are for black handle -->
-      <arg name="h_max" default="-20" />
+      <arg name="manager" value="$(arg plane_manager)" />
+      <arg name="DEFAULT_NAMESPACE" value="$(arg plane_ns)" />
+      <arg name="INPUT" value="extract_indices/output" />
+      <!-- Parameters are for white broom plane -->
+      <arg name="h_max" default="127" />
       <arg name="h_min" default="-128" />
       <arg name="s_max" default="255" />
       <arg name="s_min" default="0" />
-      <arg name="i_max" default="100" />
-      <arg name="i_min" default="0" />
+      <arg name="i_max" default="255" />
+      <arg name="i_min" default="171" />
     </include>
+
+    <!-- RViz -->
+    <node if="$(arg gui)" name="rviz" pkg="rviz" type="rviz"
+          args="-d $(find yamaopt_ros)/demo/pr2_broom/broom_handle.rviz" />
   </group>
+
 </launch>
