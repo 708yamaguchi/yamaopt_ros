@@ -39,15 +39,16 @@
 (setq *sweep-vectors*
         (list
          (progn (send *pr2* :angle-vector #f(52.758 58.8947 42.183 52.8039 -90.881 156.4 -29.7862 -175.134 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 50.5807 35.904))
-                (send *pr2* :larm :move-end-pos #f(50 0 0) :local :use-torso nil))
-         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 386 550) :rpy (float-vector 0 0 1.02)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
-         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 548 520) :rpy (float-vector 0 0 1.13)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
-         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(650 519 390) :rpy (float-vector 0 0 1.1)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
+                (send *pr2* :larm :move-end-pos #f(80 0 0) :world :use-torso nil))
+         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(670 386 550) :rpy (float-vector 0 0 1.02)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
+         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(670 548 520) :rpy (float-vector 0 0 1.13)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
+         (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(670 519 390) :rpy (float-vector 0 0 1.1)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords))
          (send *pr2* :larm :move-end-pos #f(0 -200 -50) :world :use-torso nil)
          ;; この間でPR2が左腕をヒネるので、モジュールを落としてしまう可能性あり。良い中間姿勢を探す必要あり（？）
          (progn (send *pr2* :angle-vector #f(52.758 58.8947 42.183 52.8039 -90.881 156.4 -29.7862 -175.134 -75.0 50.0 -110.0 -110.0 20.0 -10.0 -10.0 50.5807 35.904))
-                (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(700 276 650) :rpy (float-vector 0 0 0.38)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords)))
+                (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(670 276 650) :rpy (float-vector 0 0 0.38)) :use-torso nil :look-at-target (send *pr2* :larm :end-coords)))
          ))
+(setq *sweep-vectors-tm* (list 4000 2000 2000 2000 2000 2000 2000))
 (send *pr2* :angle-vector (send *ri* :state :potentio-vector))
 
 (setq *demo-coords*
@@ -105,6 +106,14 @@
       (return-from check-position nil))
     (format t "PR2 position and rotation is good for demo.~%")
     t))
+
+(defun set-broom-to-check-position ()
+  (let ((i 2))
+    (send *ri* :angle-vector-sequence
+          (subseq *sweep-vectors* 0 i)
+          (subseq *sweep-vectors-tm* 0 i))
+    (send *ri* :wait-interpolation))
+  (send *pr2* :angle-vector (send *ri* :state :potentio-vector)))
 
 (defun grasp-broom-and-module-in-advance (&optional (speak nil))
   (send *ri* :stop-grasp :arms)
@@ -205,14 +214,16 @@
   (send *ri* :speak-jp "ゴミをかきだします。")
   (send *ri* :angle-vector-sequence
         *sweep-vectors*
-        (list 4000 2000 2000 2000 2000 2000 2000))
+        *sweep-vectors-tm*)
   (send *ri* :wait-interpolation))
 
 (defun main ()
   ;; Set fixture to broom before the demo
   ;; (set-broom-fixture)
-  ;; Check demo position
+  ;; Check demo position by amcl
   ;; (check-position)
+  ;; Check demo position by setting broom near the fridge
+  ;; (set-broom-to-check-position)
   ;; Grasp broom as prepose of the demo
   ;; (grasp-broom-and-module-in-advance)
 

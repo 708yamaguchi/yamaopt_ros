@@ -68,6 +68,11 @@
       <arg name="i_max" default="100" />
       <arg name="i_min" default="0" />
     </include>
+    <rosparam subst_value="true">
+      <!-- Not to speak PR2 -->
+      $(arg handle_ns)/euclidean_clustering/vital_rate: 0.01
+      $(arg handle_ns)/cluster_decomposer/vital_rate: 0.01
+    </rosparam>
 
     <group ns="$(arg plane_ns)">
       <node pkg="nodelet" type="nodelet" name="$(arg plane_manager)"
@@ -121,6 +126,11 @@
       <arg name="i_max" default="255" />
       <arg name="i_min" default="171" />
     </include>
+    <rosparam subst_value="true">
+      <!-- Not to speak PR2 -->
+      $(arg plane_ns)/euclidean_clustering/vital_rate: 0.01
+      $(arg plane_ns)/cluster_decomposer/vital_rate: 0.01
+    </rosparam>
 
     <!-- RViz -->
     <node if="$(arg gui)" name="rviz" pkg="rviz" type="rviz"
