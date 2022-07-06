@@ -50,7 +50,9 @@ class CalcSensorPlacement(object):
             msg = rospy.wait_for_message('/sensor_type', String, timeout=None)
             sensor_type = msg.data
         # Here, self.config_x(self.config_z) is for align_axis_name == 'x(z)'
-        if sensor_type in ['ai_camera', 'thermography']:
+        if sensor_type in ['thermography']:
+            optframe_xyz_from_ef = [0.0, 0.0, 1.0]
+        elif sensor_type in ['ai_camera']:
             optframe_xyz_from_ef = [0.0, 0.0, 1.0]
         else:  # 'microphone' or 'co2_sensor':
             optframe_xyz_from_ef = [0.0, 0.0, 0.0]

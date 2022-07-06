@@ -17,7 +17,7 @@
       #f(52.654 36.7816 40.2475 66.9702 -101.449 -225.7 -24.9766 265.422 -27.9717 21.9281 -68.518 -98.7688 211.195 -28.6571 -144.966 -1.59565 37.8384))
 
 (setq *look-at-broom-pose*
-      #f(52.8778 59.8438 28.7232 68.7124 -113.311 93.62 -94.1234 -228.505 -26.7458 32.3683 -36.2564 -80.3959 282.072 -47.7815 -189.989 -7.7453 40.2))
+      #f(52.8778 59.8438 28.7232 68.7124 -113.311 93.62 -94.1234 -228.505 -18.6459 22.5119 -30.8229 -52.2023 293.08 -53.9357 -209.19 -7.7453 30))
 
 ;; For small broom
 ;; (send *pr2* :larm :inverse-kinematics (make-coords :pos #f(574 0 1030) :rpy (float-vector (/ -pi 4) 0 0)) :use-torso nil)
@@ -120,7 +120,7 @@
 (defun find-broom-handle-pos ()
   (let (broom-handle-msg broom-handle-box)
     (while (not broom-handle-box)
-      (setq broom-handle-msg (one-shot-subscribe "/broom_handle/HSI_color_filter/boxes"
+      (setq broom-handle-msg (one-shot-subscribe "/broom_handle/HSI_color_filter_for_handle/boxes"
                                                  jsk_recognition_msgs::BoundingBoxArray))
       (setq broom-handle-box (car (send broom-handle-msg :boxes))))
     (let* ((broom-handle-pose-camera (send broom-handle-box :pose))
