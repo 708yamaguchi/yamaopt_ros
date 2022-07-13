@@ -3,6 +3,7 @@
   <arg name="port" default="/dev/rfcomm1" />
   <arg name="baud" default="115200" />
   <arg name="gui" default="false" />
+  <arg name="unitv_image" default="/unitv_image" />
 
   <!-- Recognize broom and its handle  -->
   <include file="$(find yamaopt_ros)/demo/pr2_broom/broom_recognition.launch" />
@@ -33,5 +34,21 @@
   <!--   <arg name="baud" value="$(arg baud)" /> -->
   <!--   <arg name="gui" value="$(arg gui)" /> -->
   <!-- </include> -->
+
+  <node pkg="image_transport" type="republish" name="republish" args="compressed raw">
+    <remap from="in" to="/unitv_image" />
+    <remap from="out" to="/unitv_image" />
+  </node>
+
+  <node name="draw_rects" pkg="jsk_perception" type="draw_rects">
+    <remap from="~input" to="$(arg unitv_image)" />
+    <remap from="~input/rects" to="$(arg unitv_image)/rects" />
+    <remap from="~input/class" to="$(arg unitv_image)/class" />
+    <rosparam>
+      use_classification_result: true
+      label_size: 0.3
+      resolution_factor: 2.0
+    </rosparam>
+  </node>
 
 </launch>

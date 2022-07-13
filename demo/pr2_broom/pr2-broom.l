@@ -166,6 +166,7 @@
     ;; attachment is also not stable
     ;; (send pr2-hand-coords :translate #f(-10 0 -20) :local)
     ;; (send pr2-hand-coords :translate #f(-20 0 0) :local)
+    (send pr2-hand-coords :translate #f(0 0 10) :world)
     (format t "~A~%" pr2-hand-coords)
     (send *pr2* :larm :inverse-kinematics pr2-hand-coords :use-torso nil))
   (send *ri* :angle-vector (send *pr2* :angle-vector) 2000)
@@ -192,16 +193,24 @@
   ;; TODO: Need fix for search-avs (PR2 cannot see the bottle)
   (let ((search-avs
          (list
+          ;; For long brooms, old params
+          ;; (send *pr2* :angle-vector
+          ;;       #f(52.7 67.2314 25.9319 72.1467 -90.7628 149.02 -22.4216 -219.228 -74.7828 49.0326 -113.815 -109.448 19.9973 -5.72958 -10.0461 4.7647 34.848))
+          ;; (send *pr2* :angle-vector
+          ;;       #f(52.7 62.2985 28.6681 53.0207 -52.6038 47.79 -49.093 -108.297 -74.7828 48.7466 -114.927 -109.439 19.9973 -5.72958 -10.0461 28.4767 49.368))
+          ;; (send *pr2* :angle-vector
+          ;;       #f(52.7 68.8458 15.0893 69.5882 -82.4521 118.11 -16.3279 -202.536 -74.7828 48.7466 -114.927 -109.439 19.9973 -5.72958 -10.0461 4.7707 34.848))
           (send *pr2* :angle-vector
-                #f(52.7 67.2314 25.9319 72.1467 -90.7628 149.02 -22.4216 -219.228 -74.7828 49.0326 -113.815 -109.448 19.9973 -5.72958 -10.0461 4.7647 34.848))
+                #f(52.7 62.6388 33.714 65.9723 -83.3836 140.705 -19.1099 -220.852 -74.7828 49.0326 -113.815 -109.448 19.9973 -5.72958 -10.0461 4.7647 34.848))
           (send *pr2* :angle-vector
-                #f(52.7 62.2985 28.6681 53.0207 -52.6038 47.79 -49.093 -108.297 -74.7828 48.7466 -114.927 -109.439 19.9973 -5.72958 -10.0461 28.4767 49.368))
+                #f(52.7 56.9259 28.4939 52.9113 -39.4882 40.7023 -53.1817 -116.653 -74.7828 48.7466 -114.927 -109.439 19.9973 -5.72958 -10.0461 28.4767 49.368))
           (send *pr2* :angle-vector
-                #f(52.7 68.8458 15.0893 69.5882 -82.4521 118.11 -16.3279 -202.536 -74.7828 48.7466 -114.927 -109.439 19.9973 -5.72958 -10.0461 4.7707 34.848))
+                #f(52.7 63.3097 25.052 59.7775 -76.7908 108.771 -19.5763 -199.626 -74.7828 48.7466 -114.927 -109.439 19.9973 -5.72958 -10.0461 4.7707 34.848))
                )))
     (dolist (search-av search-avs)
       (send *pr2* :angle-vector search-av)
       (send *ri* :angle-vector (send *pr2* :angle-vector) 3000)
+      (send *ri* :wait-interpolation)
       (dotimes (i 3)
         (when (find-object "bottle")
           (send *ri* :speak-jp "ゴミが見つかりました。" :wait t)
@@ -226,6 +235,8 @@
   ;; (set-broom-to-check-position)
   ;; Grasp broom as prepose of the demo
   ;; (grasp-broom-and-module-in-advance)
+  ;; Demo init pose
+  ;; (send *ri* :angle-vector (send *pr2* :angle-vector *demo-init-pose*) 5000)
 
   ;; Main
   (attach-module)

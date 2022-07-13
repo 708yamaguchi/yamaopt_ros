@@ -204,12 +204,12 @@
       ;;   (send *ri* :angle-vector-sequence avs tms))
       ;; (cancel-motion-when-touch :arm target-arm :direction axis :threshold touch-thre)
 
-      (send *pr2* :larm :move-end-rot -2 :y)
-      (send *pr2* :larm :move-end-rot -2 :y)
+      ;; (send *pr2* :larm :move-end-rot -2 :y)
+      ;; (send *pr2* :larm :move-end-rot -2 :y)
 
       ;; ;; Push again
       (let (av avs tms)
-        (dotimes (i 2)
+        (dotimes (i 4)
           (send *pr2* target-arm :move-end-pos move :local)
           (setq av (send *pr2* :angle-vector))
           (setq avs (append avs (list av)))
