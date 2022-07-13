@@ -28,28 +28,29 @@
             (car (send (one-shot-subscribe "/speech_to_text_google" speech_recognition_msgs::SpeechRecognitionCandidates) :transcript)))
       (print speech)
       ;; speech should be "73 A 4"
-      (send *ri* :speak-jp (format nil "~Aに宅配便がくるのを見ておきます。" speech) :wait t)
+      (send *ri* :speak-jp (format nil "~Aに宅配便がくるのを待ちます。" speech) :wait t)
       (setq *target-room* speech)
       ))
   ;; Remove module from Qi transmitter
-  (let ((av1 (send *fetch* :angle-vector
-                   #f(200 81.6916 -30.137 -83.7719 98.5518 0.0404 67.56 0.058964 0 40)))
-        (av2 (send *fetch* :inverse-kinematics
-                   (make-coords :pos #f(780 0 920) :rpy (float-vector pi/2 pi/2 0))
-                   :use-torso nil))
-        (av3 (send *fetch* :rarm :move-end-pos #f(0 0 -130) :world :use-torso nil)))
-    (send *ri* :stop-grasp :wait t)
-    (send *ri* :angle-vector-sequence
-          (list av1 av2 av3)
-          (list 5000 5000 3000))
-    (unix:sleep 14)
-    (send *ri* :start-grasp :wait t)
-    (send *fetch* :reset-pose)
-    (send *ri* :angle-vector-sequence
-          (list av2 av1 (send *fetch* :reset-pose))
-          (list 3000 5000 5000))
-    (unix:sleep 14))
+  ;; (let ((av1 (send *fetch* :angle-vector
+  ;;                  #f(200 81.6916 -30.137 -83.7719 98.5518 0.0404 67.56 0.058964 0 40)))
+  ;;       (av2 (send *fetch* :inverse-kinematics
+  ;;                  (make-coords :pos #f(780 0 920) :rpy (float-vector pi/2 pi/2 0))
+  ;;                  :use-torso nil))
+  ;;       (av3 (send *fetch* :rarm :move-end-pos #f(0 0 -130) :world :use-torso nil)))
+  ;;   (send *ri* :stop-grasp :wait t)
+  ;;   (send *ri* :angle-vector-sequence
+  ;;         (list av1 av2 av3)
+  ;;         (list 5000 5000 3000))
+  ;;   (unix:sleep 14)
+  ;;   (send *ri* :start-grasp :wait t)
+  ;;   (send *fetch* :reset-pose)
+  ;;   (send *ri* :angle-vector-sequence
+  ;;         (list av2 av1 (send *fetch* :reset-pose))
+  ;;         (list 3000 5000 5000))
+  ;;   (unix:sleep 14))
   ;; Move out from 73B2
+  ;; fetchは73B2の中で、大きなテレビの方を向いている状態からスタート
   (send *ri* :go-pos-unsafe -1 0 90)
   (send *ri* :clear-costmap)
   (send *ri* :move-to (make-coords :pos #f(-725.195 6774.428 30000.0) :rpy #f(-3.125 6.409e-15 -7.293e-15)))
@@ -59,32 +60,32 @@
 ;; その後、73B2に戻る。
 (defun attach-module ()
   ;; Move to the *target-room*
-  (send *ri* :go-pos-unsafe 1 0 0)
   (send *ri* :clear-costmap)
   (cond
    ((equal *target-room* "73 A 4")
-    (send *ri* :move-to (make-coords :pos #f(-1200 7513.149 30000.0) :rpy #f(3.081 6.962e-15 -3.125e-15))))
+    (send *ri* :move-to (make-coords :pos #f(-1242.364 8771.451 30000.0) :rpy #f(3.118 -2.183e-15 6.250e-17))))
     (t
      nil))
   ;; Attach the module on the wall
   ;; 配置は10度くらい斜めに傾けて、人の顔が見えるようにしている
-  (let* ((av-temp
-          (send *fetch* :angle-vector #f(200.0 42.7065 -0.751278 -94.3525 82.8331 -3.53775 -46.1664 -9.7726 -0.232261 15.4101)))
-         (base-scan-ranges (send (one-shot-subscribe "/base_scan" sensor_msgs::LaserScan) :ranges))
-         (distance-to-wall (elt base-scan-ranges (/ (length base-scan-ranges) 2)))
-         (av2 (send *fetch* :rarm :move-end-pos (float-vector (- (* distance-to-wall 1000) 725) 0 0) :world :use-torso nil))
-         (av1
-          (send *fetch* :rarm :move-end-pos #f(-130 0 0) :world :use-torso nil)))
-    (send *ri* :start-grasp :wait t)
-    (send *ri* :angle-vector-sequence-raw
-          (list av1 av2)
-          (list 8000 3000))
-    (unix:sleep 12)
-    (send *ri* :stop-grasp :wait t)
-    (send *ri* :angle-vector-sequence-raw
-          (list av1 (send *fetch* :reset-pose))
-          (list 3000 8000))
-      (unix:sleep 12))
+  ;; TODO: Use (place-sensor) function
+  ;; (let* ((av-temp
+  ;;         (send *fetch* :angle-vector #f(200.0 42.7065 -0.751278 -94.3525 82.8331 -3.53775 -46.1664 -9.7726 -0.232261 15.4101)))
+  ;;        (base-scan-ranges (send (one-shot-subscribe "/base_scan" sensor_msgs::LaserScan) :ranges))
+  ;;        (distance-to-wall (elt base-scan-ranges (/ (length base-scan-ranges) 2)))
+  ;;        (av2 (send *fetch* :rarm :move-end-pos (float-vector (- (* distance-to-wall 1000) 725) 0 0) :world :use-torso nil))
+  ;;        (av1
+  ;;         (send *fetch* :rarm :move-end-pos #f(-130 0 0) :world :use-torso nil)))
+  ;;   (send *ri* :start-grasp :wait t)
+  ;;   (send *ri* :angle-vector-sequence-raw
+  ;;         (list av1 av2)
+  ;;         (list 8000 3000))
+  ;;   (unix:sleep 12)
+  ;;   (send *ri* :stop-grasp :wait t)
+  ;;   (send *ri* :angle-vector-sequence-raw
+  ;;         (list av1 (send *fetch* :reset-pose))
+  ;;         (list 3000 8000))
+  ;;     (unix:sleep 12))
   ;; Return to 73B2
   (send *ri* :go-pos-unsafe -0.3 0.3 180)
   (send *ri* :go-pos-unsafe 0.5 0 0)
@@ -101,7 +102,7 @@
       (if (equal unitv-class "person")
         (return)
         (unix:sleep 1))))
-  (send *ri* :speak-jp "宅配の人を見つけました" :wait t)
+  (send *ri* :speak-jp "宅配の人が来ました。" :wait t)
   ;; Move to the *target-room*
   (send *ri* :go-pos-unsafe 1 0 0)
   (send *ri* :clear-costmap)
@@ -191,4 +192,12 @@
           (list 3000 5000 5000))
     (unix:sleep 14)
     )
+  )
+
+(defun main ()
+  (receive-request)
+  (attach-module)
+  (receive-delivery)
+  ;; (retrieve-module)
+  ;; (charge-module)
   )

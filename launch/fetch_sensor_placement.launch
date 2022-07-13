@@ -42,7 +42,7 @@
       <remap from="~input_coefficients"
              to="/organized_multi_plane_segmentation/output_coefficients"/>
       <rosparam>
-        frame_id: /base_footprint
+        frame_id: /base_link
       </rosparam>
     </node>
     <!-- Accumulate polygon array -->

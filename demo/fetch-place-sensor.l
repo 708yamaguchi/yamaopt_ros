@@ -11,20 +11,20 @@
 
 (defun search-sensor-placement (target-arm)
   ;; Accum polygon and coef
-  (let ((neck-p-y (list (list 40 0) (list -40 0) (list 0 20) (list 0 -20)))
+  (let ((neck-p-y (list (list 20 0) (list -20 0) (list 0 20) (list 0 -20)))
         (polygon-array (instance jsk_recognition_msgs::PolygonArray :init))
         (coef-array (instance jsk_recognition_msgs::ModelCoefficientsArray :init))
         (use-vision-planes (ros::get-param "~use_vision_planes" t))
         (use-robot-planes (ros::get-param "~use_robot_planes" t))
         (accum-res-vision (instance yamaopt_ros::AccumulatePolygonsResponse :init))
-        (accum-res-robot (instance yamaopt_ros::AccumulatePolygonsResponse :init)))
+        (accum-res-body (instance yamaopt_ros::AccumulatePolygonsResponse :init)))
     ;; Get vision planes
     (when use-vision-planes
       (clear-accumulated-polygons "accum_polygons_vision")
       (dolist (p-y neck-p-y)
         (send *fetch* :head :neck-p :joint-angle (car p-y))
         (send *fetch* :head :neck-y :joint-angle (cadr p-y))
-        (send *ri* :angle-vector (send *fetch* :angle-vector) 1000)
+        (send *ri* :angle-vector-raw (send *fetch* :angle-vector) 1000 :head-controller)
         (send *ri* :wait-interpolation)
         ;; Add both robot body's plane and vision plane
         (dotimes (i 3)

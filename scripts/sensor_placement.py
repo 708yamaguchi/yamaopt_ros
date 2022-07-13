@@ -54,7 +54,9 @@ class CalcSensorPlacement(object):
             optframe_xyz_from_ef = [0.0, 0.0, 1.0]
         elif sensor_type in ['ai_camera']:
             optframe_xyz_from_ef = [0.0, 0.0, 1.0]
-        else:  # 'microphone' or 'co2_sensor':
+        elif sensor_type in ['microphone'] or sensor_type in ['co2_sensor']:
+            optframe_xyz_from_ef = [0.0, 0.0, 0.0]
+        else:
             optframe_xyz_from_ef = [0.0, 0.0, 0.0]
         self.config_x = SolverConfig.from_config_path(
             config_path, use_base=use_base,
