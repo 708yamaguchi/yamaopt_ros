@@ -9,7 +9,7 @@
 (ros::roseus "sensor_placement_client")
 (fetch-init)
 
-(defun search-sensor-placement (target-arm)
+(defun search-sensor-placement (target-arm &optional (use-robot-planes-arg t))
   ;; Accum polygon and coef
   (let ((neck-p-y (list (list 20 0) (list -20 0) (list 0 20) (list 0 -20)))
         (polygon-array (instance jsk_recognition_msgs::PolygonArray :init))
@@ -109,7 +109,7 @@
       )))
 
 ;; TODO: we need to add information about handling axis (x or z)
-(defun place-sensor (&optional (arm "right"))
+(defun place-sensor (&optional (arm "right") (use-robot-planes-arg t))
   (let (arm-name target-arm av-ret sensor-placement-res)
     ;; Get target arm
     (setq arm-name (ros::get-param "~arm" arm))
@@ -125,19 +125,6 @@
     (when (equal (cadr sensor-placement-res) "z")
       (switch-module-grasp))
 
-    ;; Place sensor pre-pose
-    ;; (send *fetch* :reset-manip-pose)
-    ;; (let (av1 av2) ;; av1 is intermediate pose
-    ;;   (send *fetch* :larm :angle-vector #f(44.0768 -1.45561 80.3999 -114.4 -8.36035 -48.7027 -1.59719))
-    ;;   (setq av1 (send *fetch* :angle-vector))
-    ;;   (send *fetch* :angle-vector (car sensor-placement-res))
-    ;;   (setq av2 (send *fetch* :angle-vector))
-    ;;   (send *ri* :angle-vector-sequence (list av1 av2) (list 4000 4000))
-    ;;   (send *ri* :wait-interpolation))
-    (send *fetch* :angle-vector (car sensor-placement-res))
-    (send *ri* :angle-vector (send *fetch* :angle-vector) 10000)
-    (send *ri* :wait-interpolation)
-
     ;; Push module to plane
     (let (axis move)
       (cond ((equal (cadr sensor-placement-res) "x")
@@ -146,17 +133,39 @@
             ((equal (cadr sensor-placement-res) "z")
              (setq axis :z)
              (setq move #f(0 0 10))))
-      ;; Push module to plane
-      (send *fetch* target-arm :move-end-pos (scale 3 move) :local)
-      (send *ri* :angle-vector (send *fetch* :angle-vector) 3000)
-      (send *ri* :wait-interpolation)
+      ;; Place sensor pre-pose
+      (let (av1 av2)
+        (send *fetch* :angle-vector (send *ri* :state :potentio-vector :wait-until-update t))
+        (send *fetch* :rarm :angle-vector #f(-68.3597 8.60077 -97.8784 -120.274 5.86314 -38.3702 -23.4518))
+        (setq av1 (send *fetch* :angle-vector))
+        (send *fetch* :angle-vector (car sensor-placement-res))
+        (send *fetch* target-arm :move-end-pos (scale -3 move) :local)
+        (setq av2 (send *fetch* :angle-vector))
+        (send *ri* :angle-vector-sequence
+              (list av1 av2) (list 3000 3000))
+        (unix:sleep 6))
 
-      ;; Release module
-      (send *ri* :stop-grasp :wait t)
-      (send *fetch* target-arm :move-end-pos
-            (scale -5 move) :local :use-torso nil)
-      (send *ri* :angle-vector (send *fetch* :angle-vector) 2000)
-      (send *ri* :wait-interpolation))
+        ;; Push module to plane
+        (send *fetch* target-arm :move-end-pos (scale 5 move) :local)
+        (send *ri* :angle-vector (send *fetch* :angle-vector) 3000)
+        (send *ri* :wait-interpolation)
+
+        ;; Release module
+        (send *ri* :stop-grasp :wait t)
+        (send *fetch* target-arm :move-end-pos
+              (scale -5 move) :local :use-torso nil)
+        (send *ri* :angle-vector (send *fetch* :angle-vector) 2000)
+        (send *ri* :wait-interpolation)
+
+        ;; Reset pose
+        (set-arm :mirror 5000))
     ;; Return PR2 angle-vector when touch
     av-ret)
   )
+
+  ;; :mirror means mirror pose of :reset-pose
+(defun set-arm (&optional (pose :normal) (tm 15000))
+  (cond ((eq pose :normal) (send *fetch* :reset-pose))
+        ((eq pose :mirror) (send *fetch* :angle-vector #f(20.0 -75.6304 80.2141 -157.644 -98.5487 0.0 -95.111 0.0 0.0 0.0))))
+  (send *ri* :angle-vector (send *fetch* :angle-vector) tm)
+  (send *ri* :wait-interpolation))

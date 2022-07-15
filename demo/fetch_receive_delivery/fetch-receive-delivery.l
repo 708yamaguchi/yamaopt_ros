@@ -4,10 +4,10 @@
 ;; TODO: Add (place-sensor) in (attach-module)
 
 (load "package://fetcheus/fetch-interface.l")
+(load "package://yamaopt_ros/demo/fetch-place-sensor.l")
 
 (ros::load-ros-manifest "sensor_msgs")
 (ros::load-ros-manifest "speech_recognition_msgs")
-(ros::load-ros-manifest "jsk_recognition_msgs")
 
 (fetch-init)
 
@@ -15,9 +15,12 @@
 (ros::set-dynamic-reconfigure-param
  "/move_base/local_costmap/inflater" "inflation_radius" :double 0.35)
 
+
+;; fetchは73B2の中で、大きなテレビの方を向いている状態からスタート
 ;; Fetchが「宅配便を受け取って」と言われたら、どの部屋に宅配便が来るかを聞き返す。
 ;; その後、モジュールをQiトランスミッタから取り外して73B2から出ていく。
 (defun receive-request ()
+  (print "Waiting for speech")
   ;; Receive request
   (let ((speech (car (send (one-shot-subscribe "/speech_to_text_google" speech_recognition_msgs::SpeechRecognitionCandidates) :transcript))))
     (print speech)
@@ -50,7 +53,6 @@
   ;;         (list 3000 5000 5000))
   ;;   (unix:sleep 14))
   ;; Move out from 73B2
-  ;; fetchは73B2の中で、大きなテレビの方を向いている状態からスタート
   (send *ri* :go-pos-unsafe -1 0 90)
   (send *ri* :clear-costmap)
   (send *ri* :move-to (make-coords :pos #f(-725.195 6774.428 30000.0) :rpy #f(-3.125 6.409e-15 -7.293e-15)))
@@ -69,6 +71,7 @@
   ;; Attach the module on the wall
   ;; 配置は10度くらい斜めに傾けて、人の顔が見えるようにしている
   ;; TODO: Use (place-sensor) function
+  (place-sensor "right" nil)
   ;; (let* ((av-temp
   ;;         (send *fetch* :angle-vector #f(200.0 42.7065 -0.751278 -94.3525 82.8331 -3.53775 -46.1664 -9.7726 -0.232261 15.4101)))
   ;;        (base-scan-ranges (send (one-shot-subscribe "/base_scan" sensor_msgs::LaserScan) :ranges))
@@ -88,20 +91,25 @@
   ;;     (unix:sleep 12))
   ;; Return to 73B2
   (send *ri* :go-pos-unsafe -0.3 0.3 180)
-  (send *ri* :go-pos-unsafe 0.5 0 0)
+  ;; (send *ri* :go-pos-unsafe 0.5 0 0)
   (send *ri* :move-to (make-coords :pos #f(1750.247 6138.067 30000.0) :rpy #f(0.045 5.607e-15 3.108e-15)))
   )
 
 ;; モジュールに人の姿が写ったら、fetchは73B2から指定された部屋の前まで行く。
 ;; 「宅配便ですか」と聞き、「はい」と言われたら宅配便を受け取って73B2に帰っていく。
+;; fetchは73B2の中で、入り口のドアの方を向いて待機している
 (defun receive-delivery ()
   ;; Wait for the delivery people to come
+  (ros::rate 100)
   (while t
-    (let ((unitv-class (car (send (one-shot-subscribe "/unitv_image/class" jsk_recognition_msgs::ClassificationResult) :label_names))))
-      (print unitv-class)
-      (if (equal unitv-class "person")
-        (return)
-        (unix:sleep 1))))
+    (let* ((volume-msg (one-shot-subscribe "/pdm_spm1423/pdm_volume" std_msgs::Float32))
+           (volume (send volume-msg :data))
+           (threshold 100))
+      (when (> volume threshold)
+        (format t "[Over ~A] Volume is ~A~%" threshold volume)
+        (return))
+      (format t "Volume is ~A~%" volume))
+    (ros::sleep))
   (send *ri* :speak-jp "宅配の人が来ました。" :wait t)
   ;; Move to the *target-room*
   (send *ri* :go-pos-unsafe 1 0 0)
@@ -195,6 +203,10 @@
   )
 
 (defun main ()
+  ;; set pose for demo
+  ;; DANGEROUS! Make sure that nothing is near fetch
+  (set-arm :mirror 15000)
+
   (receive-request)
   (attach-module)
   (receive-delivery)

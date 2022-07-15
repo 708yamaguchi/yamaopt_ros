@@ -90,7 +90,7 @@
   </node>
 
   <!-- Client to calculate sensor placement optimization with vision and robot planes -->
-  <!-- This node moves PR2 -->
+  <!-- This node moves fetch -->
   <node pkg="yamaopt_ros" type="fetch-place-sensor.l"
         name="sample_sensor_placement_client" if="$(arg move_robot)"
         output="screen" args="&quot;(place-sensor)&quot;" >
