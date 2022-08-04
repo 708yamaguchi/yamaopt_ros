@@ -63,7 +63,7 @@
                             ;;       (list 1.5 -1.5 0))
                             nil ;; Do not use movable polygon
                             ))
-          (target-point (target-point->msg (list 0.8 0.1 1.1)))
+          (target-point (target-point->msg (list 0.8 0.1 0.9)))
           ;; (arm-left (concatenate cons (send *fetch* :larm :angle-vector)))
           (arm-right (concatenate cons (send *fetch* :rarm :angle-vector)))
           (torso (list (send *fetch* :torso :waist-z :joint-angle)))
@@ -116,9 +116,9 @@
     (cond ((equal arm-name "right") (setq target-arm :rarm))
           ((equal arm-name "left") (setq target-arm :larm)))
     ;; Search sensor placement
-    (send *fetch* :reset-pose)
-    (send *ri* :angle-vector (send *fetch* :angle-vector) 5000)
-    (send *ri* :wait-interpolation)
+    ;; (send *fetch* :reset-pose)
+    ;; (send *ri* :angle-vector (send *fetch* :angle-vector) 5000)
+    ;; (send *ri* :wait-interpolation)
     (setq sensor-placement-res (search-sensor-placement target-arm))
 
     ;; If needed, switch module grasping
@@ -139,25 +139,30 @@
         (send *fetch* :rarm :angle-vector #f(-68.3597 8.60077 -97.8784 -120.274 5.86314 -38.3702 -23.4518))
         (setq av1 (send *fetch* :angle-vector))
         (send *fetch* :angle-vector (car sensor-placement-res))
-        (send *fetch* target-arm :move-end-pos (scale -3 move) :local)
+        (send *fetch* target-arm :move-end-pos (scale -15 move) :local)
         (setq av2 (send *fetch* :angle-vector))
         (send *ri* :angle-vector-sequence
               (list av1 av2) (list 3000 3000))
         (unix:sleep 6))
 
         ;; Push module to plane
-        (send *fetch* target-arm :move-end-pos (scale 5 move) :local)
+        (send *fetch* target-arm :move-end-pos (scale 20 move) :local)
         (send *ri* :angle-vector (send *fetch* :angle-vector) 3000)
         (send *ri* :wait-interpolation)
 
         ;; Release module
         (send *ri* :stop-grasp :wait t)
         (send *fetch* target-arm :move-end-pos
-              (scale -5 move) :local :use-torso nil)
+              (scale -15 move) :local :use-torso nil
+              :rotation-axis nil)
         (send *ri* :angle-vector (send *fetch* :angle-vector) 2000)
         (send *ri* :wait-interpolation)
 
         ;; Reset pose
+        (send *fetch* :rarm :angle-vector
+              #f(-30.4756 -25.263 308.359 -101.81 41.2738 0.0 337.082))
+        (send *ri* :angle-vector (send *fetch* :angle-vector) 2000)
+        (send *ri* :wait-interpolation)
         (set-arm :mirror 5000))
     ;; Return PR2 angle-vector when touch
     av-ret)

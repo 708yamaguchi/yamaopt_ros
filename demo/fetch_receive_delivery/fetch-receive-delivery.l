@@ -53,9 +53,9 @@
   ;;         (list 3000 5000 5000))
   ;;   (unix:sleep 14))
   ;; Move out from 73B2
-  (send *ri* :go-pos-unsafe -1 0 90)
+  ;; (send *ri* :go-pos-unsafe -1 0 90)
   (send *ri* :clear-costmap)
-  (send *ri* :move-to (make-coords :pos #f(-725.195 6774.428 30000.0) :rpy #f(-3.125 6.409e-15 -7.293e-15)))
+  (send *ri* :move-to (make-coords :pos #f(-1100 8771.451 30000.0) :rpy #f(3.118 -2.183e-15 6.250e-17)))
   )
 
 ;; 73B2から出てきたFetchが、指定された部屋の前にモジュールを配置する。
@@ -65,7 +65,7 @@
   (send *ri* :clear-costmap)
   (cond
    ((equal *target-room* "73 A 4")
-    (send *ri* :move-to (make-coords :pos #f(-1242.364 8771.451 30000.0) :rpy #f(3.118 -2.183e-15 6.250e-17))))
+    (send *ri* :move-to (make-coords :pos #f(-1100 8771.451 30000.0) :rpy #f(3.118 -2.183e-15 6.250e-17))))
     (t
      nil))
   ;; Attach the module on the wall
@@ -90,7 +90,7 @@
   ;;         (list 3000 8000))
   ;;     (unix:sleep 12))
   ;; Return to 73B2
-  (send *ri* :go-pos-unsafe -0.3 0.3 180)
+  ;; (send *ri* :go-pos-unsafe -0.3 0.3 180)
   ;; (send *ri* :go-pos-unsafe 0.5 0 0)
   (send *ri* :move-to (make-coords :pos #f(1750.247 6138.067 30000.0) :rpy #f(0.045 5.607e-15 3.108e-15)))
   )
@@ -140,7 +140,7 @@
         (unix:sleep 6))
       ))
   ;; Return to 73B2
-  (send *ri* :go-pos-unsafe -0.7 0 -90)
+  ;; (send *ri* :go-pos-unsafe -0.7 0 -90)
   (send *ri* :clear-costmap)
   (send *ri* :move-to (make-coords :pos #f(1750.247 6138.067 30000.0) :rpy #f(0.045 5.607e-15 3.108e-15)))
   )
@@ -206,6 +206,7 @@
   ;; set pose for demo
   ;; DANGEROUS! Make sure that nothing is near fetch
   (set-arm :mirror 15000)
+
 
   (receive-request)
   (attach-module)

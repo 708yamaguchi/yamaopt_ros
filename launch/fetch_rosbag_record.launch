@@ -37,25 +37,39 @@
 
           /sensor_placement/request
           /sensor_placement/response
-          /sensor_type
-          /attach_type
-          /battery_level
-          /is_charging
-          /stop
-          /start
 
-          /eco2
-          /tvoc
-          /thermal/min_temp
-          /thermal/max_temp
-          /thermal/center_temp
-          /thermal/image
-          /pdm_audio
-          /pdm_volume
-          /unitv_image/compressed
-          /unitv_image
-          /unitv_image/rects
-          /unitv_image/class
+          /tvoc_sgp30/eco2
+          /tvoc_sgp30/tvoc
+          /tvoc_sgp30/battery_level
+          /tvoc_sgp30/is_charging
+          /tvoc_sgp30/sensor_type
+          /tvoc_sgp30/attach_type
+
+          /mlx90640/thermal/min_temp
+          /mlx90640/thermal/max_temp
+          /mlx90640/thermal/center_temp
+          /mlx90640/thermal/image
+          /mlx90640/battery_level
+          /mlx90640/is_charging
+          /mlx90640/sensor_type
+          /mlx90640/attach_type
+
+          /pdm_spm1423/pdm_audio
+          /pdm_spm1423/pdm_volume
+          /pdm_spm1423/battery_level
+          /pdm_spm1423/is_charging
+          /pdm_spm1423/sensor_type
+          /pdm_spm1423/attach_type
+
+          /unitv/unitv_image/compressed
+          /unitv/unitv_image
+          /unitv/unitv_image/rects
+          /unitv/unitv_image/class
+          /unitv/battery_level
+          /unitv/is_charging
+          /unitv/sensor_type
+          /unitv/attach_type
+
 "
       output="screen" />
 
