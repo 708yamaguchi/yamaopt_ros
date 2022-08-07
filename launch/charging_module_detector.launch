@@ -1,0 +1,31 @@
+<!-- https://github.com/708yamaguchi/jsk_robot/blob/module-charge-station-bk/jsk_fetch_robot/jsk_fetch_startup/launch/wireless_charger_detector.launch -->
+
+<launch>
+  <!-- The reason for using L515 instead of PrimeSense, which has the same resolution,
+       is that L515 has a wider dynamic range and images are less likely to be blown out. -->
+
+  <arg name="point_ns" default="/l515_head/depth_registered" />
+
+  <!-- color recognition -->
+  <!-- Launch this node inside fetch -->
+  <include file="$(find jsk_pcl_ros)/launch/hsi_color_filter.launch">
+    <arg name="INPUT" value="points" />
+    <arg name="DEFAULT_NAMESPACE" value="$(arg point_ns)" />
+    <arg name="h_max" default="111" />
+    <arg name="h_min" default="75" />
+    <arg name="s_max" default="249" />
+    <arg name="s_min" default="77" />
+    <arg name="i_max" default="249" />
+    <arg name="i_min" default="74" />
+  </include>
+  <rosparam subst_value="true">
+    <!-- Vital rate is not to speak fetch -->
+    $(arg point_ns)/euclidean_clustering/vital_rate: 0.01
+    $(arg point_ns)/cluster_decomposer:
+      vital_rate: 0.01
+      align_boxes: true
+      align_boxes_with_plane: false
+      target_frame_id: base_link
+  </rosparam>
+
+</launch>
