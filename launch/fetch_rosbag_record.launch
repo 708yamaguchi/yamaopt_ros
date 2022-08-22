@@ -35,6 +35,11 @@
           /server_name/smach/container_structure
           /audio
 
+          /l515_head/color/image_rect_color/compressed
+          /l515_head/color/camera_info
+          /l515_head/aligned_depth_to_color/image_raw/compressedDepth
+          /l515_head/aligned_depth_to_color/camera_info
+
           /sensor_placement/request
           /sensor_placement/response
 
@@ -69,7 +74,6 @@
           /unitv/is_charging
           /unitv/sensor_type
           /unitv/attach_type
-
 "
       output="screen" />
 
