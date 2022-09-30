@@ -4,15 +4,17 @@
 ;; roslaunch yamaopt_ros charging_module_detector.launch
 
 (load "package://fetcheus/fetch-interface.l")
+(fetch-init)
+
 ;; ;; This takes long time at first time
 (load "package://yamaopt_ros/scripts/simple-navigation.l")
 (ros::load-ros-manifest "jsk_recognition_msgs")
-(fetch-init)
 
 ;; Global variable to save angle vectors to reach for charging module
+;; Current values are used at research movie
 (setq *av1* #f(50.0 -40.5203 25.6296 126.55 121.381 -64.757 65.4506 -28.088 81.0 54.0))
 (setq *av2* #f(50.0 -18.6104 64.4238 107.364 128.973 -126.189 43.7173 -14.9165 81.0 54.0))
-(setq *av3* #f(50.0 -13.226 86.975 124.06 126.589 -118.286 56.5119 -42.0648 81.0 54.0))
+(setq *av3* #f(50.0 13.8392 86.6755 165.04 128.973 -109.674 68.5563 -43.8282 81.0 54.0))
 
 ;; This function assumes to be passed to (sort) function
 ;; args should be jsk_recognition_msgs::Boundingbox
@@ -33,6 +35,7 @@
     box-list))
 
 (defun look-at-modules (&optional (tm 3000))
+  (send *ri* :speak-jp "充電中のモジュールを探します" :wait nil)
   (send *ri* :angle-vector
         (send *fetch* :angle-vector #f(269 76 86.5 -12 92 0.1 93 0.0 75.5 60))
         tm)
@@ -46,12 +49,14 @@
 ;; Before this function, do not forget to call (look-at-module)
 ;; Smaller index corresponds to the module, which is places at the bigger x position
 (defun grasp-module (index)
-  (send *ri* :stop-grasp :wait t)
+  ;; (send *ri* :stop-grasp :wait t :effort 65)
+  (send *ri* :go-grasp :wait t :effort 65 :pos 1.0)
   (let* ((target-box (elt (get-charger-boxes) index))
          (target-pos (ros::tf-point->pos (send target-box :pose :position)))
-         (offset-world #f(-30 0 0)) ;; This value changes when camera is calibrated
+         (offset-world #f(-30 0 -20)) ;; This value changes when camera is calibrated
          (offset-local #f(-55 0 10)) ;; This value is fixed based on the fetch's hand shape
          av1 av2 av3)
+    (send *ri* :speak-jp "モジュールが見つかりました。充電ステーションから取り外します。" :wait nil)
     ;; intermidiate pose
     ;; Note that IK is unstable
     (setq av1
@@ -77,8 +82,7 @@
           )
     (unix:sleep 15)
     ;; Grasp
-    (send *ri* :start-grasp :wait t)
-    (unix:sleep 1)
+    (send *ri* :start-grasp :wait t :effort 65)
     ;; Reverse movement
     (send *ri* :angle-vector-sequence
           (list av2 av1 (send *fetch* :reset-pose))
@@ -89,6 +93,7 @@
   ))
 
 (defun charge-module ()
+  (send *ri* :speak-jp "元あった場所にモジュールを戻して充電します。" :wait nil)
   (send *ri* :angle-vector-sequence
         (list *av1* *av2* *av3*)
         (list 7000 5000 5000)
@@ -108,7 +113,8 @@
             2000)
       (send *ri* :wait-interpolation)
       ))
-  (send *ri* :stop-grasp :wait t)
+  ;; (send *ri* :stop-grasp :wait t :effort 65)
+  (send *ri* :go-grasp :wait t :effort 65 :pos 1.0)
 
   ;; Reverse movement
   (send *ri* :angle-vector-sequence

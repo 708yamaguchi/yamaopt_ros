@@ -39,6 +39,7 @@
           /l515_head/color/camera_info
           /l515_head/aligned_depth_to_color/image_raw/compressedDepth
           /l515_head/aligned_depth_to_color/camera_info
+          /l515_head/depth_registered/boxes
 
           /sensor_placement/request
           /sensor_placement/response
@@ -65,6 +66,14 @@
           /pdm_spm1423/is_charging
           /pdm_spm1423/sensor_type
           /pdm_spm1423/attach_type
+
+          /enviii/humidity
+          /enviii/pressure
+          /enviii/temperature
+          /enviii/battery_level
+          /enviii/is_charging
+          /enviii/sensor_type
+          /enviii/attach_type
 
           /unitv/unitv_image/compressed
           /unitv/unitv_image

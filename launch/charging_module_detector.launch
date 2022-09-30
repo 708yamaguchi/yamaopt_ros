@@ -11,12 +11,12 @@
   <include file="$(find jsk_pcl_ros)/launch/hsi_color_filter.launch">
     <arg name="INPUT" value="points" />
     <arg name="DEFAULT_NAMESPACE" value="$(arg point_ns)" />
-    <arg name="h_max" default="111" />
+    <arg name="h_max" default="127" />
     <arg name="h_min" default="75" />
     <arg name="s_max" default="249" />
-    <arg name="s_min" default="77" />
+    <arg name="s_min" default="78" />
     <arg name="i_max" default="249" />
-    <arg name="i_min" default="74" />
+    <arg name="i_min" default="78" />
   </include>
   <rosparam subst_value="true">
     <!-- Vital rate is not to speak fetch -->
