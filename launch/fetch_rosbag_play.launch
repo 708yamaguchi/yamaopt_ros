@@ -25,7 +25,12 @@
   <arg name="sensor_type" default="none" doc="If given, /sensor_placement node does not wait for /sensor_type topic" />
 
   <param name="use_sim_time" value="true" />
-  <param name="robot_description" textfile="$(find fetch_description)/robots/fetch.urdf" />
+  <!-- <param name="robot_description" textfile="$(find fetch_description)/robots/fetch.urdf" /> -->
+  <param name="robot_description"
+         command="$(find xacro)/xacro $(find jsk_fetch_startup)/robots/jsk_fetch.urdf.xacro
+                  ros_distro:=melodic use_fetch_description:=true
+                  base_camera_mount:=false head_box:=false
+                  head_l515:=true insta360_stand:=true" />
 
   <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen" />
 
@@ -142,5 +147,24 @@
       </rosparam>
     </node>
   </group>
+
+  <!-- publish l515 pointcloud from compressed rgb and depth images -->
+  <include file="$(find yamaopt_ros)/launch/republish_l515_images.launch">
+    <arg name="rgb" value="color" />
+    <arg name="depth_registered" value="aligned_depth_to_color" />
+    <arg name="use_throttled_image" value="false" />
+  </include>
+
+  <node name="$(anon resize_cloud)"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ResizePointsPublisher"
+        respawn="true">
+    <remap from="~input" to="/l515_head_remote/aligned_depth_to_color/points" />
+    <remap from="~output" to="/l515_head_remote/aligned_depth_to_color/quater/points" />
+    <rosparam>
+      step_x: 4
+      step_y: 4
+    </rosparam>
+  </node>
 
 </launch>

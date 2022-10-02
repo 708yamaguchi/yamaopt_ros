@@ -1,0 +1,79 @@
+<launch>
+
+  <arg name="in_camera" default="l515_head"
+       doc="namespace of input topics" />
+  <arg name="out_camera" default="l515_head_remote"
+       doc="namespace of republished topics" />
+  <arg name="rgb" default="rgb"
+       doc="namespace of rgb topics" />
+  <arg name="depth" default="depth"
+       doc="namespace of depth topics" />
+  <arg name="depth_registered" default="depth_registered"
+       doc="namespace of depth_registered topics" />
+  <arg name="depth_registered_filtered" default="depth_registered" doc="For filtering depth images, set depth_registered_filtered to the filtered depth image topic" />
+  <arg name="use_throttled_image" default="true" />
+  <arg name="depth_registration" default="true" />
+
+  <arg unless="$(arg use_throttled_image)"
+       name="throttled" value="" />
+  <arg if="$(arg use_throttled_image)"
+       name="throttled" value="/throttled" />
+  <arg name="png_level" value="1"
+       doc="publishing is delayed because the computation load of png's compression processing is too large for the default compression ratio. As a result, it is inferred that synchronization problems occur when creating point clouds. "/>
+
+  <group ns="$(arg out_camera)" >
+    <group ns="$(arg depth_registered)" >
+      <group ns="image_rect" >
+        <param name="compressed/format" value="png" />
+        <param name="compressed/png_level" value="$(arg png_level)" />
+        <param name="compressedDepth/png_level" value="$(arg png_level)" />
+      </group>
+      <group ns="image_rect_raw" >
+        <param name="compressed/format" value="png" />
+        <param name="compressed/png_level" value="$(arg png_level)" />
+        <param name="compressedDepth/png_level" value="$(arg png_level)" />
+      </group>
+
+      <node name="relay_info"
+            pkg="topic_tools" type="relay"
+            args="/$(arg in_camera)/$(arg depth_registered)/$(arg throttled)camera_info
+                  camera_info">
+      </node>
+      <node name="republish_image"
+            pkg="image_transport" type="republish"
+            args="compressedDepth raw">
+        <remap from="in" to="/$(arg in_camera)/$(arg depth_registered)/$(arg throttled)image_raw"/>
+        <remap from="out" to="image_raw" />
+      </node>
+    </group> <!-- end of $(arg depth_registered) ns -->
+    <group ns="$(arg rgb)" >
+      <node name="relay_info"
+            pkg="topic_tools" type="relay"
+            args="/$(arg in_camera)/$(arg rgb)/$(arg throttled)camera_info
+                  camera_info">
+      </node>
+
+      <node name="republish_image"
+            pkg="image_transport" type="republish"
+            args="compressed raw" >
+        <!-- <remap from="in" to="/$(arg in_camera)/$(arg rgb)/$(arg throttled)image_raw" /> -->
+        <!-- <remap from="out" to="image_raw" /> -->
+        <remap from="in" to="/$(arg in_camera)/$(arg rgb)/$(arg throttled)image_rect_color" />
+        <remap from="out" to="image_rect_color" />
+      </node>
+    </group> <!-- end of $(arg rgb) ns -->
+    <!-- Subscribe -->
+    <!-- /l515_head_remote/color/image_rect_color -->
+    <!-- /l515_head_remote/aligned_depth_to_color/image_raw -->
+    <!-- Publish -->
+    <!-- /l515_head_remote/aligned_depth_to_color/points -->
+    <node pkg="nodelet" type="nodelet" name="points_xyzrgb_hw_registered"
+          args="standalone depth_image_proc/point_cloud_xyzrgb">
+      <remap from="rgb/image_rect_color"        to="color/image_rect_color"        />
+      <remap from="rgb/camera_info"             to="color/camera_info"             />
+      <remap from="depth_registered/image_rect" to="aligned_depth_to_color/image_raw"  />
+      <remap from="depth_registered/points"     to="aligned_depth_to_color/points" />
+    </node>
+  </group> <!-- end of out_camera ns -->
+
+</launch>
