@@ -109,7 +109,7 @@
         args="$(arg rosbag) $(arg loop_flag) --clock" output="screen" />
 
   <node pkg="rviz" type="rviz" name="$(anon rviz)" if="$(arg gui)"
-        args="-d $(find jsk_pr2_startup)/config/jsk_startup.rviz" />
+        args="-d $(find yamaopt_ros)/config/pr2_plane_polygons.rviz" />
 
   <group if="$(arg visualize_optimization)">
     <!-- Subscribe /sensor_placement/request in rosbag file
